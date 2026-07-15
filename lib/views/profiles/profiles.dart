@@ -450,14 +450,6 @@ class _ProfileItemState extends State<ProfileItem> {
                                 onPressed: updateProfile,
                               ),
                             ],
-                            if (widget.profile.providerHeaders['support-url'] != null && widget.profile.providerHeaders['support-url']!.isNotEmpty && !_isTV )
-                            PopupMenuItemData(
-                              icon: Icons.contact_support,
-                              label: appLocalizations.support,
-                              onPressed: () {
-                                globalState.openUrl(widget.profile.providerHeaders['support-url']!);
-                              },
-                            ),
                             PopupMenuItemData(
                               icon: Icons.extension_outlined,
                               label: appLocalizations.override,

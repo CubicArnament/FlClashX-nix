@@ -7,7 +7,7 @@ import 'package:flclashx/models/models.dart';
 import 'package:flclashx/providers/providers.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/views/profiles/add_profile.dart';
-import 'package:flclashx/widgets/text.dart';
+import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -192,24 +192,24 @@ class _FocusableTapState extends State<_FocusableTap> {
           },
         ),
       },
-      child: AnimatedScale(
+      // Focus ring only — no scale-up. AnimatedScale painted outside the layout
+      // bounds, so a full-width autofocused control (the connect button on
+      // desktop) spilled past the window edges once 1.5% of its width exceeded
+      // the 16px side padding.
+      child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        scale: _focused ? 1.03 : 1.0,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius + 4),
-            border: Border.all(
-              color:
-                  _focused ? context.colorScheme.primary : Colors.transparent,
-              width: 2,
-            ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(widget.borderRadius + 4),
+          border: Border.all(
+            color:
+                _focused ? context.colorScheme.primary : Colors.transparent,
+            width: 2,
           ),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: widget.onTap,
-            child: widget.child,
-          ),
+        ),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: widget.child,
         ),
       ),
     );
@@ -1125,7 +1125,7 @@ class _AnnounceBanner extends StatelessWidget {
 // ----------------------------------------------------------------------------
 // Hero actions: refresh / support chips
 // ----------------------------------------------------------------------------
-class _HeroActionRow extends StatelessWidget {
+class _HeroActionRow extends ConsumerWidget {
   const _HeroActionRow({
     required this.isUpdating,
     required this.onUpdate,
@@ -1137,8 +1137,9 @@ class _HeroActionRow extends StatelessWidget {
   final String? supportUrl;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hasSupport = supportUrl != null && supportUrl!.isNotEmpty;
+    final globalModeEnabled = ref.watch(globalModeEnabledProvider);
     return Row(
       children: [
         Expanded(
@@ -1159,7 +1160,72 @@ class _HeroActionRow extends StatelessWidget {
             ),
           ),
         ],
+        if (globalModeEnabled) ...[
+          const SizedBox(width: 10),
+          const _ModeChip(),
+        ],
       ],
+    );
+  }
+}
+
+// Outbound-mode chip (rule/global) — icon-only square in the action-chip visual
+// language, pinned after the Support chip. The current mode is conveyed by the
+// icon itself; tapping opens the same mode popup as on the proxies page. Only
+// rendered when the global-mode setting is on (gated by the caller).
+class _ModeChip extends ConsumerWidget {
+  const _ModeChip();
+
+  IconData _modeIcon(Mode mode) => switch (mode) {
+        Mode.rule => Icons.rule,
+        Mode.global => Icons.public,
+        Mode.direct => Icons.flash_on,
+      };
+
+  String _modeLabel(Mode mode) => switch (mode) {
+        Mode.rule => appLocalizations.rule,
+        Mode.global => appLocalizations.global,
+        Mode.direct => appLocalizations.direct,
+      };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = context.colorScheme;
+    final mode = ref.watch(
+      patchClashConfigProvider.select((state) => state.mode),
+    );
+    return CommonPopupBox(
+      targetBuilder: (open) => Tooltip(
+        message: _modeLabel(mode),
+        child: _FocusableTap(
+          borderRadius: 22,
+          onTap: () => open(offset: const Offset(0, 20)),
+          child: Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHigh.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.6)),
+            ),
+            child: Icon(_modeIcon(mode), size: 18, color: colorScheme.primary),
+          ),
+        ),
+      ),
+      popup: CommonPopupMenu(
+        items: [
+          for (final item in Mode.values.where((m) => m != Mode.direct))
+            PopupMenuItemData(
+              icon: _modeIcon(item),
+              label: _modeLabel(item),
+              onPressed: () {
+                globalState.appController.changeMode(item);
+              },
+            ),
+        ],
+      ),
     );
   }
 }

@@ -132,9 +132,16 @@ class FlVpnService : VpnService(), IBaseService {
         if (intent?.action == ACTION_STOP) {
             GlobalState.launch {
                 State.runLock.withLock { handleStop() }
-                // handleStop early-returns when nothing is running; for a recreated-
-                // then-stopped process that still left the foreground notification up,
-                // guarantee teardown so no empty foreground service lingers.
+                // handleStop early-returns when nothing is running — which is exactly
+                // the OEM-kill case: MIUI killed :remote, so the recreated process has
+                // runTime==0 and handleStop skips clearing the persisted intent flag.
+                // The notification stop then only removed the notification while the
+                // tile stayed on, the timer kept running and the tunnel resurrected on
+                // next app open (StateHub's recovery bias reads isVpnActive()==true).
+                // Force the persisted teardown so a notification stop fully stops,
+                // matching the quick-settings tile stop even after a kill.
+                SavedParams.setVpnActive(false)
+                StateHub.publish(StateHub.STOPPED, message = "notification stop")
                 if (!destroyed) {
                     stopForegroundCompat()
                     stopSelf()

@@ -142,7 +142,9 @@ class Request {
       final tag = release['tag_name'] as String? ?? '';
       if (!tag.startsWith('core-')) continue;
       final remote = tag.replaceFirst('core-', '').replaceAll(RegExp(r'^v'), '');
-      if (remote == current) return null;
+      // Strictly newer only: a locally built core can be ahead of the newest
+      // core-* release, and offering it back would be a silent downgrade.
+      if (utils.compareVersions(remote, current) <= 0) return null;
       return release as Map<String, dynamic>;
     }
     return null;
@@ -271,6 +273,35 @@ class Request {
       final data = response.data as String;
       return data.isEmpty;
     } catch (_) {
+      return false;
+    }
+  }
+
+  /// Ask the SYSTEM helper to swap in the pending core update. Needed for
+  /// per-machine installs (Program Files) where the unelevated app can't
+  /// overwrite the binary itself. The helper stops the core, moves the file and
+  /// refreshes the allow-list hash. Returns true only if it reports success.
+  Future<bool> replaceCoreByHelper(String pendingPath, String targetPath) async {
+    try {
+      final response = await _dio
+          .post(
+            "http://$localhost:$helperPort/replace_core",
+            data: json.encode({
+              "pending": pendingPath,
+              "target": targetPath,
+            }),
+            options: Options(responseType: ResponseType.plain),
+          )
+          .timeout(const Duration(milliseconds: 10000));
+      if (response.statusCode != HttpStatus.ok) return false;
+      final data = response.data as String;
+      if (data.isNotEmpty) {
+        commonPrint.log("replaceCoreByHelper: $data");
+        return false;
+      }
+      return true;
+    } catch (e) {
+      commonPrint.log("replaceCoreByHelper error: $e");
       return false;
     }
   }

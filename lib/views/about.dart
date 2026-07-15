@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flclashx/clash/core.dart';
 import 'package:flclashx/common/common.dart';
+import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -564,7 +565,19 @@ class _CoreUpdateItemState extends State<_CoreUpdateItem> {
         title: appLocalizations.coreUpdateSuccess,
         actions: [
           TextButton(
-            onPressed: () => globalState.appController.handleRestart(),
+            onPressed: () {
+              // Restart only the core, not the whole app. reStart applies the
+              // pending binary (helper swap on Windows) and re-inits in place, so
+              // the Dart run-state stays in sync — a full app restart
+              // (handleRestart) left the UI thinking the core was stopped while it
+              // was actually up and proxying.
+              // Close the dialog + the About sheet and jump to the dashboard so the
+              // restart happens on the main screen, not buried in settings.
+              globalState.navigatorKey.currentState
+                  ?.popUntil((route) => route.isFirst);
+              globalState.appController.toPage(PageLabel.dashboard);
+              globalState.appController.restartCore();
+            },
             child: Text(appLocalizations.restart),
           ),
         ],

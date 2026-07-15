@@ -81,9 +81,13 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <!-- Impeller OFF (Skia): Impeller's Vulkan backend janks animations on some
+             Pixel GPUs (Tensor) even at a forced 120 Hz, while other devices are
+             fine — the classic device-specific Impeller regression. Skia renders
+             smoothly here. Revisit if a future Flutter drops the Skia backend. -->
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="true" />
+            android:value="false" />
 
         <!-- Public automation entry point (MacroDroid/Tasker send START/STOP/CHANGE
              intents): must stay callable by third-party apps, so no signature
