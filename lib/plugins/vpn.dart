@@ -24,18 +24,11 @@ class Vpn {
 
   Vpn._();
 
-  String _cachedServerName = '';
   String _cachedProfileName = 'FlClashX';
   String _cachedServiceName = '';
 
-  String get cachedServerName => _cachedServerName;
   String get cachedProfileName => _cachedProfileName;
   String get cachedServiceName => _cachedServiceName;
-
-  void updateServerName(String serverName) {
-    _cachedServerName = serverName;
-    _pushNotification();
-  }
 
   void updateProfileInfo({
     required String profileName,
@@ -48,15 +41,12 @@ class Vpn {
 
   Future<void> _pushNotification() async {
     try {
-      final displayName = _cachedServiceName.isNotEmpty
+      final title = _cachedServiceName.isNotEmpty
           ? _cachedServiceName
           : _cachedProfileName;
-      final title = _cachedServerName.isNotEmpty
-          ? '$displayName / $_cachedServerName'
-          : displayName;
-      commonPrint.log('[Vpn] pushNotification: title="$title" server="$_cachedServiceName" clashLib=${clashLib != null}');
+      commonPrint.log('[Vpn] pushNotification: title="$title" clashLib=${clashLib != null}');
       // Leave the stop-button label to its localized default ("Остановить" / "Stop");
-      // the service/server name already lives in the notification title above.
+      // the service name already lives in the notification title above.
       await clashLib?.updateNotificationParams(
         title: title,
       );

@@ -73,33 +73,10 @@ class AppController {
         proxyName: proxyName,
       );
       await updateGroups();
-      // Update cached server name for foreground notification
-      _updateForegroundServerName(groupName, proxyName);
     }, args: [groupName, proxyName]);
   }
 
-  /// Update cached server name in VPN plugin for foreground notification.
-  /// Only updates if the changed group matches the flclashx-serverinfo header,
-  /// or if no header is set and this is the first non-DIRECT/REJECT group.
-  void _updateForegroundServerName(String groupName, String proxyName) {
-    final profile = globalState.config.currentProfile;
-    if (profile == null) return;
-    final serverInfoHeader = profile.providerHeaders['flclashx-serverinfo'];
-    if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
-      String decodedGroupName;
-      try {
-        final normalized = base64.normalize(serverInfoHeader);
-        decodedGroupName = utf8.decode(base64.decode(normalized)).trim();
-      } catch (_) {
-        decodedGroupName = serverInfoHeader.trim();
-      }
-      if (groupName != decodedGroupName) return;
-    }
-    final groups = _ref.read(groupsProvider);
-    vpn?.updateServerName(groups.resolveToLeafProxy(proxyName));
-  }
-
-  /// Initialize foreground notification cache with current profile and server
+  /// Initialize foreground notification cache with current profile
   void initForegroundCache() {
     final profile = globalState.config.currentProfile;
     if (profile == null) return;
@@ -118,43 +95,11 @@ class AppController {
       }
     }
 
-    commonPrint.log('[initForegroundCache] profileName="$profileName" serviceName="$serviceName" selectedMap=${profile.selectedMap}');
+    commonPrint.log('[initForegroundCache] profileName="$profileName" serviceName="$serviceName"');
     vpn?.updateProfileInfo(
       profileName: profileName,
       serviceName: serviceName,
     );
-
-    final groups = _ref.read(groupsProvider);
-    String serverName = "";
-    final serverInfoHeader = profile.providerHeaders['flclashx-serverinfo'];
-    if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
-      String decodedGroupName;
-      try {
-        final normalized = base64.normalize(serverInfoHeader);
-        decodedGroupName = utf8.decode(base64.decode(normalized)).trim();
-      } catch (_) {
-        decodedGroupName = serverInfoHeader.trim();
-      }
-      final group = groups.getGroup(decodedGroupName);
-      if (group != null) {
-        serverName = groups.resolveToLeafProxy(group.realNow);
-      }
-      if (serverName.isEmpty) {
-        serverName = profile.selectedMap[decodedGroupName] ?? "";
-      }
-    }
-    if (serverName.isEmpty) {
-      for (final g in groups) {
-        final now = groups.resolveToLeafProxy(g.realNow);
-        if (now.isNotEmpty && now != 'DIRECT' && now != 'REJECT') {
-          serverName = now;
-          break;
-        }
-      }
-    }
-    if (serverName.isNotEmpty) {
-      vpn?.updateServerName(serverName);
-    }
   }
 
   Future<void> restartCore() async {

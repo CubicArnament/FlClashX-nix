@@ -153,7 +153,7 @@ class AboutView extends StatelessWidget {
             title: Text(appLocalizations.core),
             onTap: () {
               globalState.openUrl(
-                "https://github.com/pluralplay/xHomo",
+                "https://github.com/MetaCubeX/mihomo",
               );
             },
             trailing: const Icon(Icons.insert_link),
