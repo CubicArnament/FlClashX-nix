@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flclashx/common/common.dart';
@@ -9,6 +10,7 @@ import 'package:flclashx/state.dart';
 import 'package:flclashx/views/profiles/add_profile.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -1004,7 +1006,12 @@ class _ConnectButton extends ConsumerWidget {
       autofocus: true,
       borderRadius: 24,
       onTap: isReady
-          ? () => globalState.appController.updateStatus(!isStart)
+          ? () {
+              if (Platform.isAndroid) {
+                HapticFeedback.mediumImpact();
+              }
+              globalState.appController.updateStatus(!isStart);
+            }
           : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
