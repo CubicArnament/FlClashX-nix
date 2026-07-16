@@ -1,3 +1,69 @@
+## v0.4.0
+
+### New home screen
+
+- A new home screen look (enabled in theme settings or via a subscription header): service logo and name, a traffic & expiry card, an active-server panel with country flag, IP and ping, a large connect button and new bottom navigation.
+
+- "Renew subscription" and "Buy more traffic" buttons — appear automatically when the plan is running out and the links are provided in the subscription headers.
+
+- Rule/Global mode switch right on the home screen.
+
+### Connections
+
+- The page is fully reworked: "Active" and "Log" tabs in one place.
+
+- Every connection shows the app icon, destination country flag, traffic and the proxy chain.
+
+- Any connection can be closed individually; tapping the app icon filters by that app.
+
+- zashboard button — the web control panel in one click.
+
+### Android
+
+- Noticeably lower background battery drain: the app no longer keeps the device awake, the notification was slimmed down, and background checks don't wake the phone while the screen is off.
+
+- VPN reliability: autostart after reboot, Always-on VPN support, self-recovery after aggressive battery optimizers (MIUI, Samsung, etc.), reconnection on network change.
+
+- Home screen widgets: a VPN toggle and a mode switcher.
+
+- "Start" and "Stop" shortcuts on long-press of the app icon.
+
+- Haptic feedback on the start/stop button.
+
+- Smoother UI: fixed jank on Pixel devices, 120 Hz support.
+
+- Send a subscription from any phone to a TV via QR — the code is now readable by a regular QR scanner.
+
+### Windows / macOS / Linux
+
+- Core updates right from the app: check, download with progress and install without restarting the app — on Windows it works even for Program Files installs, with no UAC prompts.
+
+- If the core crashes, the app restarts it and restores the connection automatically.
+
+- The tray icon now follows the system theme.
+
+- macOS: fixed system DNS issues.
+
+- Linux: native .deb, .rpm and AppImage packages; new Windows ARM and Linux ARM builds.
+
+### Core & network
+
+- Core updated to mihomo 1.19.28 — switched from a fork to the original core.
+
+- Fresh browser TLS fingerprints (client-fingerprint: firefox / safari).
+
+- Faster startup, instant ping of the active server, more accurate delay testing through the core.
+
+- Switching and updating a profile on a running VPN — without restarting the tunnel.
+
+- Config editor: syntax highlighting, search and line numbers.
+
+### For providers
+
+- Automatic subscription migration to a new domain — no profile reinstall needed.
+
+- More customization via subscription headers: logo, service name, theme, background, payment buttons and more — full list at https://flclashx.app
+
 ## v0.8.86
 
 - Fix windows tun issues

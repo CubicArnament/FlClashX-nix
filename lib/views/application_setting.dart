@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flclashx/common/common.dart';
+import 'package:flclashx/plugins/app.dart';
 import 'package:flclashx/providers/config.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/widgets/widgets.dart';
@@ -142,18 +144,25 @@ class CloseConnectionsItem extends ConsumerWidget {
     final closeConnections = ref.watch(
       appSettingProvider.select((state) => state.closeConnections),
     );
-    return ListItem.switchItem(
-      title: Text(appLocalizations.autoCloseConnections),
-      subtitle: Text(appLocalizations.autoCloseConnectionsDesc),
-      delegate: SwitchDelegate(
-        value: closeConnections,
-        onChanged: (value) async {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  closeConnections: value,
-                ),
-              );
-        },
+    final overrideProviderSettings = ref.watch(
+      appSettingProvider.select((state) => state.overrideProviderSettings),
+    );
+    final isEnabled = overrideProviderSettings;
+    return Opacity(
+      opacity: isEnabled ? 1.0 : 0.5,
+      child: ListItem.switchItem(
+        title: Text(appLocalizations.autoCloseConnections),
+        subtitle: Text(appLocalizations.autoCloseConnectionsDesc),
+        delegate: SwitchDelegate(
+          value: closeConnections,
+          onChanged: isEnabled ? (value) async {
+            ref.read(appSettingProvider.notifier).updateState(
+                  (state) => state.copyWith(
+                    closeConnections: value,
+                  ),
+                );
+          } : null,
+        ),
       ),
     );
   }
@@ -337,6 +346,78 @@ class HiddenItem extends ConsumerWidget {
   }
 }
 
+class BatteryOptimizationItem extends ConsumerStatefulWidget {
+  const BatteryOptimizationItem({super.key});
+
+  @override
+  ConsumerState<BatteryOptimizationItem> createState() =>
+      _BatteryOptimizationItemState();
+}
+
+class _BatteryOptimizationItemState
+    extends ConsumerState<BatteryOptimizationItem> with WidgetsBindingObserver {
+  bool _ignoring = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(_refresh());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Re-read once the user returns from the system exemption dialog/settings.
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_refresh());
+    }
+  }
+
+  Future<void> _refresh() async {
+    final ignoring = await app?.isIgnoringBatteryOptimizations() ?? true;
+    if (mounted) {
+      setState(() {
+        _ignoring = ignoring;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => ListItem(
+        title: Text(appLocalizations.batteryOptimization),
+        subtitle: Text(appLocalizations.batteryOptimizationDesc),
+        trailing: _ignoring
+            ? Icon(Icons.check_circle, color: context.colorScheme.primary)
+            : const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: _ignoring
+            ? null
+            : () async {
+                await app?.requestIgnoreBatteryOptimizations();
+                await _refresh();
+              },
+      );
+}
+
+class AutoStartItem extends ConsumerWidget {
+  const AutoStartItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => ListItem(
+        title: Text(appLocalizations.autoStart),
+        subtitle: Text(appLocalizations.autoStartDesc),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          unawaited(app?.openAutoStartSettings());
+        },
+      );
+}
+
 class AnimateTabItem extends ConsumerWidget {
   const AnimateTabItem({super.key});
 
@@ -370,18 +451,25 @@ class OpenLogsItem extends ConsumerWidget {
     final openLogs = ref.watch(
       appSettingProvider.select((state) => state.openLogs),
     );
-    return ListItem.switchItem(
-      title: Text(appLocalizations.logcat),
-      subtitle: Text(appLocalizations.logcatDesc),
-      delegate: SwitchDelegate(
-        value: openLogs,
-        onChanged: (bool value) {
-          ref.read(appSettingProvider.notifier).updateState(
-                (state) => state.copyWith(
-                  openLogs: value,
-                ),
-              );
-        },
+    final overrideProviderSettings = ref.watch(
+      appSettingProvider.select((state) => state.overrideProviderSettings),
+    );
+    final isEnabled = overrideProviderSettings;
+    return Opacity(
+      opacity: isEnabled ? 1.0 : 0.5,
+      child: ListItem.switchItem(
+        title: Text(appLocalizations.logcat),
+        subtitle: Text(appLocalizations.logcatDesc),
+        delegate: SwitchDelegate(
+          value: openLogs,
+          onChanged: isEnabled ? (bool value) {
+            ref.read(appSettingProvider.notifier).updateState(
+                  (state) => state.copyWith(
+                    openLogs: value,
+                  ),
+                );
+          } : null,
+        ),
       ),
     );
   }
@@ -439,6 +527,8 @@ class ApplicationSettingView extends StatelessWidget {
       AutoRunItem(),
       if (Platform.isAndroid) ...[
         HiddenItem(),
+        BatteryOptimizationItem(),
+        AutoStartItem(),
       ],
       AnimateTabItem(),
       OpenLogsItem(),

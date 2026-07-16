@@ -146,7 +146,6 @@ class ConnectionsState with _$ConnectionsState {
 extension ConnectionsStateExt on ConnectionsState {
   List<Connection> get list {
     final lowerQuery = query.toLowerCase().trim();
-    final lowQuery = query.toLowerCase();
     return connections.where((connection) {
       final chains = connection.chains;
       final process = connection.metadata.process;
@@ -158,7 +157,7 @@ extension ConnectionsStateExt on ConnectionsState {
       return {...chains, process}.containsAll(keywords) &&
           (networkText.contains(lowerQuery) ||
               hostText.contains(lowerQuery) ||
-              destinationIPText.contains(lowQuery) ||
+              destinationIPText.contains(lowerQuery) ||
               processText.contains(lowerQuery) ||
               chainsText.contains(lowerQuery));
     }).toList();
@@ -277,6 +276,20 @@ extension GroupsExt on List<Group> {
   Group? getGroup(String groupName) {
     final index = indexWhere((element) => element.name == groupName);
     return index != -1 ? this[index] : null;
+  }
+
+  /// Resolves a proxy name through nested groups (load-balance / url-test / relay /
+  /// fallback / selector) down to the actual leaf proxy in use, so notification/UI
+  /// shows the real server instead of an intermediate group name. Depth-guarded
+  /// against cyclic group references.
+  String resolveToLeafProxy(String proxyName, [int depth = 0]) {
+    if (depth > 16) return proxyName;
+    final group = getGroup(proxyName);
+    if (group == null) return proxyName; // not a group -> leaf proxy
+    final now = group.now;
+    if (now == null || now.isEmpty) return proxyName;
+    if (now == 'DIRECT' || now == 'REJECT') return now;
+    return resolveToLeafProxy(now, depth + 1);
   }
 }
 
@@ -438,6 +451,18 @@ class IpInfo {
       {
         "ip": final String ip,
         "country_code": final String countryCode,
+      } =>
+        IpInfo(
+          ip: ip,
+          countryCode: countryCode,
+        ),
+      _ => throw const FormatException("invalid json"),
+    };
+
+  static IpInfo fromIpApiComJson(Map<String, dynamic> json) => switch (json) {
+      {
+        "query": final String ip,
+        "countryCode": final String countryCode,
       } =>
         IpInfo(
           ip: ip,
