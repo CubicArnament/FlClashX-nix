@@ -1,3 +1,17 @@
+## v0.4.1
+
+- Merge branch 'dev'
+
+- in-app zashboard webview (variable), proxy folded-group ping and tv focus, accesscontrol app list, global override order, group name in server card, app and core version in UA, bump 0.4.1
+
+- add AUR publish workflow
+
+- thanks @prettyleaf
+
+- add firebase crashlytics
+
+- drop server from notification, wildcard rule types, mihomo core link
+
 ## v0.4.0
 
 ### New home screen
