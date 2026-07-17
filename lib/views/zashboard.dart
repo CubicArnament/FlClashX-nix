@@ -1,38 +1,81 @@
 import 'dart:io';
 
 import 'package:flclashx/common/common.dart';
+import 'package:flclashx/state.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-/// Opens zashboard pointed at this client's external-controller: in the
-/// built-in webview when [inApp] is set and the platform has a webview
-/// implementation, otherwise in the external browser.
+/// Opens zashboard pointed at this client's external-controller: in the built-in
+/// webview when [inApp] is set and the platform has a webview implementation,
+/// otherwise in the external browser.
+///
+/// When the external-controller is off, the in-app panel turns it on for the
+/// session and back off when the page closes. Only the in-app webview is
+/// auto-managed — we can't detect when the external browser is closed, so there
+/// the controller is left as the user set it.
 Future<void> openZashboard(BuildContext context, {required bool inApp}) async {
+  final useWebView = inApp && ZashboardWebViewPage.supported;
+  final controllerWasOff =
+      globalState.effectiveExternalController.value.trim().isEmpty;
+  final manageController = useWebView && controllerWasOff;
+
+  if (manageController) {
+    try {
+      await globalState.appController.setExternalControllerEnabled(true);
+    } catch (_) {
+      // If enabling failed the URL will still be empty below and we bail out.
+    }
+  }
+
   final url = buildZashboardUrl();
   if (url == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('external-controller is not set')),
-    );
+    if (manageController) {
+      await globalState.appController.setExternalControllerEnabled(false);
+    }
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('external-controller is not set')),
+      );
+    }
     return;
   }
-  if (inApp && ZashboardWebViewPage.supported) {
-    await BaseNavigator.push(context, ZashboardWebViewPage(url: url));
+
+  if (!context.mounted) {
+    if (manageController) {
+      await globalState.appController.setExternalControllerEnabled(false);
+    }
+    return;
+  }
+
+  if (useWebView) {
+    await BaseNavigator.push(
+      context,
+      ZashboardWebViewPage(
+        url: url,
+        disableControllerOnClose: manageController,
+      ),
+    );
     return;
   }
   await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
 }
 
-/// In-app zashboard panel. The [WebViewController] — and with it the native
-/// webview holding the loaded page, cookies and localStorage — is cached in a
-/// static across openings, so only the first open pays the page load; closing
-/// and reopening reattaches the live page instantly (Clash Mi Board-style).
-/// The cache is rebuilt when the URL changes (profile/secret/port switch).
+/// In-app zashboard panel. The webview is created per open and released when the
+/// page closes — the native view is torn down with the widget, so it doesn't
+/// keep polling the core or holding memory in the background (no static cache).
+/// When this page is the one that turned the external-controller on, it turns it
+/// back off on close.
 class ZashboardWebViewPage extends StatefulWidget {
-  const ZashboardWebViewPage({super.key, required this.url});
+  const ZashboardWebViewPage({
+    super.key,
+    required this.url,
+    this.disableControllerOnClose = false,
+  });
 
   final String url;
+  final bool disableControllerOnClose;
 
   /// webview_flutter ships no Windows/Linux implementation — callers fall back
   /// to the external browser there.
@@ -44,44 +87,44 @@ class ZashboardWebViewPage extends StatefulWidget {
 }
 
 class _ZashboardWebViewPageState extends State<ZashboardWebViewPage> {
-  static WebViewController? _cachedController;
-  static String? _cachedUrl;
-
   late final WebViewController _controller;
-  final _progress = ValueNotifier<int>(100);
+  final _progress = ValueNotifier<int>(0);
 
   @override
   void initState() {
     super.initState();
-    final cached = _cachedController;
-    if (cached != null && _cachedUrl == widget.url) {
-      _controller = cached;
-    } else {
-      _controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        // Transparent so the scaffold surface shows through while the page
-        // paints — avoids a white flash in dark theme.
-        ..setBackgroundColor(const Color(0x00000000))
-        ..loadRequest(Uri.parse(widget.url));
-      _cachedController = _controller;
-      _cachedUrl = widget.url;
-      _progress.value = 0;
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted);
+    // A transparent background avoids a white flash in dark theme while the page
+    // paints, but on macOS the WKWebView is an NSView with no real
+    // background/opaque support — the shim renders the whole page white. Only
+    // apply it where it actually works (Android/iOS); macOS keeps the default.
+    if (!Platform.isMacOS) {
+      _controller.setBackgroundColor(const Color(0x00000000));
     }
-    // The delegate is rebound on every open: it captures this State's progress
-    // notifier, and the cached controller still holds the previous State's.
     _controller.setNavigationDelegate(
       NavigationDelegate(
         onProgress: (progress) => _progress.value = progress,
         onPageFinished: (_) => _progress.value = 100,
+        onWebResourceError: (error) {
+          _progress.value = 100;
+          commonPrint.log(
+            'zashboard webview error: ${error.errorCode} ${error.description}',
+          );
+        },
       ),
     );
+    _controller.loadRequest(Uri.parse(widget.url));
   }
 
   @override
   void dispose() {
-    // The controller is intentionally NOT disposed — it stays cached so the
-    // next open is instant.
     _progress.dispose();
+    if (widget.disableControllerOnClose) {
+      // Fire-and-forget (dispose can't await): turn the external-controller back
+      // off now that the panel we opened it for is gone.
+      globalState.appController.setExternalControllerEnabled(false);
+    }
     super.dispose();
   }
 
