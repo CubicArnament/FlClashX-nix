@@ -90,7 +90,14 @@ class ChangeServerButton extends ConsumerWidget {
       return _buildSimpleButton(context);
     }
 
-    final currentServerName = group.now ?? '-';
+    // Only a Selector carries an explicit node pick. Any other group type
+    // (url-test / fallback / load-balance / relay) auto-picks or balances across
+    // its members, so its `now` is a moving/auto host — show the group's own name
+    // instead. A Selector keeps showing its current selection (a nested group
+    // already surfaces as its own name via `now`).
+    final currentServerName = group.type != GroupType.Selector
+        ? group.name
+        : (group.now ?? '-');
 
     final currentProxy = group.all.firstWhere(
       (proxy) => proxy.name == currentServerName,

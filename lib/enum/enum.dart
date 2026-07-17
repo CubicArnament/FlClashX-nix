@@ -410,6 +410,12 @@ enum DashboardWidget {
       crossAxisCellCount: 8,
       child: ServiceInfoWidget(),
     ),
+  ),
+  zashboardButton(
+    GridItem(
+      crossAxisCellCount: 4,
+      child: ZashboardButton(),
+    ),
   );
 
   final GridItem widget;

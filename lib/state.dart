@@ -44,6 +44,10 @@ class GlobalState {
   bool isPre = true;
   String? coreSHA256;
   String? coreVersion;
+  // Full release version baked in at build time via --dart-define=APP_VERSION
+  // (the CI git tag, e.g. "0.4.1-pre.18", leading `v` stripped). Empty on local
+  // builds, where [_uaVersion] falls back to the pubspec version + a `-pre` mark.
+  String appVersionTag = "";
   late PackageInfo packageInfo;
   Function? updateCurrentDelayDebounce;
   late Measure measure;
@@ -84,6 +88,12 @@ class GlobalState {
   // above is set; updateGroups then filters and reorders the core's GLOBAL group
   // to exactly these names, in this order.
   final globalGroupOrder = ValueNotifier<List<String>>([]);
+  // All proxy-group names in profile-declaration order. Used only under the
+  // GLOBAL override to order the service groups that getProxiesGroups appends
+  // from the core's proxies map — that map's keys arrive alphabetically (Go's
+  // json.Marshal sorts map keys), so without this the rule-mode group tabs would
+  // sort alphabetically instead of following the config.
+  final proxyGroupOrder = ValueNotifier<List<String>>([]);
   final navigatorKey = GlobalKey<NavigatorState>();
   AppController? _appController;
   GlobalKey<CommonScaffoldState> homeScaffoldKey = GlobalKey();
@@ -109,6 +119,10 @@ class GlobalState {
     coreVersion =
         coreVersionEnv.isEmpty ? kCoreVersionFromSource : coreVersionEnv;
     isPre = const String.fromEnvironment("APP_ENV") != 'stable';
+    const appVersionEnv = String.fromEnvironment("APP_VERSION");
+    final tag = appVersionEnv.trim();
+    appVersionTag =
+        (tag.startsWith("v") || tag.startsWith("V")) ? tag.substring(1) : tag;
     appState = AppState(
       version: version,
       viewSize: Size.zero,
@@ -142,7 +156,15 @@ class GlobalState {
     );
   }
 
-  String get ua => config.patchClashConfig.globalUa ?? packageInfo.ua;
+  // Version shown in the User-Agent: the exact release tag when present,
+  // otherwise the pubspec version with a `-pre` marker for non-stable builds.
+  String get _uaVersion => appVersionTag.isNotEmpty
+      ? appVersionTag
+      : (isPre ? "${packageInfo.version}-pre" : packageInfo.version);
+
+  String get ua =>
+      config.patchClashConfig.globalUa ??
+      packageInfo.ua(appVersion: _uaVersion, coreVersion: coreVersion);
 
   int _tasksEpoch = 0;
 
@@ -447,6 +469,8 @@ class GlobalState {
     // `flclashx-override: true`, its `proxies` list is the curated set/order we
     // show in global mode. Any other group's flag is ignored.
     final parsedGlobalOrder = <String>[];
+    // Every proxy-group name in declaration order (see proxyGroupOrder).
+    final parsedProxyGroupOrder = <String>[];
     var parsedGlobalOverride = false;
     final rawGroups = rawConfig["proxy-groups"];
     if (rawGroups is List) {
@@ -454,6 +478,7 @@ class GlobalState {
         if (g is! Map) continue;
         final name = g["name"];
         if (name is! String) continue;
+        parsedProxyGroupOrder.add(name);
         final desc = g["description"];
         if (desc is String && desc.trim().isNotEmpty) {
           parsedGroupDescriptions[name] = desc.trim();
@@ -477,6 +502,7 @@ class GlobalState {
     }
     groupDescriptions.value = parsedGroupDescriptions;
     globalGroupOrder.value = parsedGlobalOrder;
+    proxyGroupOrder.value = parsedProxyGroupOrder;
     globalOverrideEnabled.value = parsedGlobalOverride;
     // external-controller: profile value always wins when present. The UI
     // toggle only acts as a fallback because the enum hardcodes 127.0.0.1:9090

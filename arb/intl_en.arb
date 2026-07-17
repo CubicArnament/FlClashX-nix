@@ -495,5 +495,8 @@
   "batteryOptimization": "Battery optimization",
   "batteryOptimizationDesc": "Exempt the app so the system doesn't kill the VPN in the background",
   "autoStart": "Autostart",
-  "autoStartDesc": "Allow background autostart so the VPN survives reboots and updates (MIUI/EMUI etc.)"
+  "autoStartDesc": "Allow background autostart so the VPN survives reboots and updates (MIUI/EMUI etc.)",
+  "zashboardInApp": "Open zashboard in the app",
+  "zashboardInAppDesc": "Show the control panel in the built-in browser instead of switching to an external one",
+  "openPanel": "Open panel"
 }

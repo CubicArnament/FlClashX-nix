@@ -332,6 +332,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "开启后，将只统计代理流量",
     ),
     "openLogsFolder": MessageLookupByLibrary.simpleMessage("打开日志文件夹"),
+    "openPanel": MessageLookupByLibrary.simpleMessage("打开面板"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),
     "originalRepository": MessageLookupByLibrary.simpleMessage("原始存储库"),
     "other": MessageLookupByLibrary.simpleMessage("其他"),
@@ -540,6 +541,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
     "years": MessageLookupByLibrary.simpleMessage("年"),
+    "zashboardInApp": MessageLookupByLibrary.simpleMessage("在应用内打开 zashboard"),
+    "zashboardInAppDesc": MessageLookupByLibrary.simpleMessage(
+      "使用内置浏览器显示控制面板，无需跳转到外部浏览器",
+    ),
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

@@ -26,6 +26,11 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <!-- Vendor runtime permission (ITGSA standard on vivo/OPPO/Xiaomi ROMs) gating
+         the installed-app list. Without it those ROMs silently return a near-empty
+         list from getInstalledPackages even though QUERY_ALL_PACKAGES is held, so
+         AccessControl shows no apps. Unknown and ignored on AOSP-like ROMs. -->
+    <uses-permission android:name="com.android.permission.GET_INSTALLED_APPS" />
 
     <application
         android:name=".FlClashXApplication"
@@ -34,7 +39,8 @@
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:label="FlClashX"
-        android:memtagMode="off">
+        android:memtagMode="off"
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <activity
             android:name="com.follow.clashx.MainActivity"

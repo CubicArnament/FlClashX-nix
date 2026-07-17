@@ -370,6 +370,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "有効化するとプロキシトラフィックのみ統計",
     ),
     "openLogsFolder": MessageLookupByLibrary.simpleMessage("ログフォルダを開く"),
+    "openPanel": MessageLookupByLibrary.simpleMessage("パネルを開く"),
     "options": MessageLookupByLibrary.simpleMessage("オプション"),
     "originalRepository": MessageLookupByLibrary.simpleMessage("オリジナルリポジトリ"),
     "other": MessageLookupByLibrary.simpleMessage("その他"),
@@ -612,6 +613,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV設定"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("ホワイトリストモード"),
     "years": MessageLookupByLibrary.simpleMessage("年"),
+    "zashboardInApp": MessageLookupByLibrary.simpleMessage(
+      "アプリ内で zashboard を開く",
+    ),
+    "zashboardInAppDesc": MessageLookupByLibrary.simpleMessage(
+      "外部ブラウザに切り替えず、内蔵ブラウザでパネルを表示します",
+    ),
     "zh_CN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };
 }

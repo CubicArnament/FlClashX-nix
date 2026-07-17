@@ -551,6 +551,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "openLogsFolder": MessageLookupByLibrary.simpleMessage(
       "Открыть папку логов",
     ),
+    "openPanel": MessageLookupByLibrary.simpleMessage("Открыть панель"),
     "options": MessageLookupByLibrary.simpleMessage("Опции"),
     "originalRepository": MessageLookupByLibrary.simpleMessage(
       "Оригинальный репозиторий",
@@ -909,6 +910,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Через VPN идут только выбранные приложения; остальные — напрямую.",
     ),
     "years": MessageLookupByLibrary.simpleMessage("Лет"),
+    "zashboardInApp": MessageLookupByLibrary.simpleMessage(
+      "Открывать zashboard в приложении",
+    ),
+    "zashboardInAppDesc": MessageLookupByLibrary.simpleMessage(
+      "Показывать панель во встроенном браузере, не переключаясь на внешний",
+    ),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Упрощенный китайский"),
   };
 }

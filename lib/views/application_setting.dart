@@ -6,6 +6,7 @@ import 'package:flclashx/common/common.dart';
 import 'package:flclashx/plugins/app.dart';
 import 'package:flclashx/providers/config.dart';
 import 'package:flclashx/state.dart';
+import 'package:flclashx/views/zashboard.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -534,6 +535,31 @@ class AutoCheckUpdateItem extends ConsumerWidget {
   }
 }
 
+class ZashboardInAppItem extends ConsumerWidget {
+  const ZashboardInAppItem({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final zashboardInApp = ref.watch(
+      appSettingProvider.select((state) => state.zashboardInApp),
+    );
+    return ListItem.switchItem(
+      title: Text(appLocalizations.zashboardInApp),
+      subtitle: Text(appLocalizations.zashboardInAppDesc),
+      delegate: SwitchDelegate(
+        value: zashboardInApp,
+        onChanged: (bool value) {
+          ref.read(appSettingProvider.notifier).updateState(
+                (state) => state.copyWith(
+                  zashboardInApp: value,
+                ),
+              );
+        },
+      ),
+    );
+  }
+}
+
 class ApplicationSettingView extends StatelessWidget {
   const ApplicationSettingView({super.key});
 
@@ -562,6 +588,9 @@ class ApplicationSettingView extends StatelessWidget {
       OpenLogsItem(),
       CloseConnectionsItem(),
       AutoCheckUpdateItem(),
+      // The in-app webview has no Windows/Linux implementation — hide the
+      // toggle where it could never take effect.
+      if (ZashboardWebViewPage.supported) ZashboardInAppItem(),
       if (system.isDesktop) ...[
         Padding(
           padding: const EdgeInsets.only(top: 16),
