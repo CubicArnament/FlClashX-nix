@@ -239,6 +239,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "country": MessageLookupByLibrary.simpleMessage("Country"),
     "crashTest": MessageLookupByLibrary.simpleMessage("Crash test"),
+    "crashlytics": MessageLookupByLibrary.simpleMessage("Crash reports"),
+    "crashlyticsDesc": MessageLookupByLibrary.simpleMessage(
+      "Automatically upload crash logs via Firebase Crashlytics; no sensitive data is included",
+    ),
     "create": MessageLookupByLibrary.simpleMessage("Create"),
     "cut": MessageLookupByLibrary.simpleMessage("Cut"),
     "dark": MessageLookupByLibrary.simpleMessage("Dark"),
@@ -520,6 +524,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "When turned on, only proxy traffic will be counted in statistics",
     ),
     "openLogsFolder": MessageLookupByLibrary.simpleMessage("Open logs folder"),
+    "openPanel": MessageLookupByLibrary.simpleMessage("Open panel"),
     "options": MessageLookupByLibrary.simpleMessage("Options"),
     "originalRepository": MessageLookupByLibrary.simpleMessage(
       "Original Repository",
@@ -864,6 +869,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Only the selected apps are routed through the VPN; all others connect directly.",
     ),
     "years": MessageLookupByLibrary.simpleMessage("Years"),
+    "zashboardInApp": MessageLookupByLibrary.simpleMessage(
+      "Open zashboard in the app",
+    ),
+    "zashboardInAppDesc": MessageLookupByLibrary.simpleMessage(
+      "Show the control panel in the built-in browser instead of switching to an external one",
+    ),
     "zh_CN": MessageLookupByLibrary.simpleMessage("Simplified Chinese"),
   };
 }

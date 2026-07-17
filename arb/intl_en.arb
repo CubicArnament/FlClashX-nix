@@ -252,6 +252,8 @@
   "autoCloseConnectionsDesc": "Auto close connections after change node",
   "onlyStatisticsProxy": "Count only proxy traffic",
   "onlyStatisticsProxyDesc": "When turned on, only proxy traffic will be counted in statistics",
+  "crashlytics": "Crash reports",
+  "crashlyticsDesc": "Automatically upload crash logs via Firebase Crashlytics; no sensitive data is included",
   "pureBlackMode": "Pure black mode",
   "keepAliveIntervalDesc": "Tcp keep alive interval",
   "entries": " entries",
@@ -493,5 +495,8 @@
   "batteryOptimization": "Battery optimization",
   "batteryOptimizationDesc": "Exempt the app so the system doesn't kill the VPN in the background",
   "autoStart": "Autostart",
-  "autoStartDesc": "Allow background autostart so the VPN survives reboots and updates (MIUI/EMUI etc.)"
+  "autoStartDesc": "Allow background autostart so the VPN survives reboots and updates (MIUI/EMUI etc.)",
+  "zashboardInApp": "Open zashboard in the app",
+  "zashboardInAppDesc": "Show the control panel in the built-in browser instead of switching to an external one",
+  "openPanel": "Open panel"
 }

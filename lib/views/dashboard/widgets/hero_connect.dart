@@ -266,15 +266,19 @@ class HeroConnect extends ConsumerWidget {
     String? testUrl;
     Group? activeGroup;
     // Host name = the current selection of the proxy group named in the
-    // `flclashx-serverinfo` header (resolved through nested groups to the leaf),
-    // same as the foreground-notification logic. Fall back to the first real group.
+    // `flclashx-serverinfo` header, resolved through nested Selector groups to
+    // the leaf — but any non-selector group (url-test / fallback / load-balance /
+    // relay) resolves to its own name instead, since it has no single stable host
+    // to show (see resolveToDisplayName). Fall back to the first real group.
+    // Resolve from the group name (not its `now`) so a group that is itself such
+    // a type is caught too.
     final serverInfoHeader = headers['flclashx-serverinfo'];
     if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
       final groupName = _decodeBase64(serverInfoHeader) ?? serverInfoHeader.trim();
       final group = groups.getGroup(groupName);
       if (group != null) {
         activeGroup = group;
-        serverName = groups.resolveToLeafProxy(group.realNow);
+        serverName = groups.resolveToDisplayName(group.name);
         testUrl = group.testUrl;
       }
     }
@@ -283,7 +287,7 @@ class HeroConnect extends ConsumerWidget {
         final now = g.realNow;
         if (now.isNotEmpty && now != 'DIRECT' && now != 'REJECT') {
           activeGroup = g;
-          serverName = now;
+          serverName = groups.resolveToDisplayName(g.name);
           testUrl = g.testUrl;
           break;
         }

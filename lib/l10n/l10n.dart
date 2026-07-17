@@ -1984,6 +1984,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Crash reports`
+  String get crashlytics {
+    return Intl.message(
+      'Crash reports',
+      name: 'crashlytics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatically upload crash logs via Firebase Crashlytics; no sensitive data is included`
+  String get crashlyticsDesc {
+    return Intl.message(
+      'Automatically upload crash logs via Firebase Crashlytics; no sensitive data is included',
+      name: 'crashlyticsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Pure black mode`
   String get pureBlackMode {
     return Intl.message(
@@ -3872,6 +3892,31 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `Open zashboard in the app`
+  String get zashboardInApp {
+    return Intl.message(
+      'Open zashboard in the app',
+      name: 'zashboardInApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show the control panel in the built-in browser instead of switching to an external one`
+  String get zashboardInAppDesc {
+    return Intl.message(
+      'Show the control panel in the built-in browser instead of switching to an external one',
+      name: 'zashboardInAppDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open panel`
+  String get openPanel {
+    return Intl.message('Open panel', name: 'openPanel', desc: '', args: []);
   }
 }
 

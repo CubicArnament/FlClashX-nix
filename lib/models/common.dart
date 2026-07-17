@@ -291,6 +291,23 @@ extension GroupsExt on List<Group> {
     if (now == 'DIRECT' || now == 'REJECT') return now;
     return resolveToLeafProxy(now, depth + 1);
   }
+
+  /// Like [resolveToLeafProxy], but only descends through Selector groups — the
+  /// ones carrying an explicit user pick. Any other group type (url-test /
+  /// fallback / load-balance / relay) auto-selects or balances across its
+  /// members, so its `now` is a moving/auto host that's a misleading label; for
+  /// those, return the group's own name — that's what the user selected and
+  /// recognises. Leaf proxies still resolve to the real host.
+  String resolveToDisplayName(String proxyName, [int depth = 0]) {
+    if (depth > 16) return proxyName;
+    final group = getGroup(proxyName);
+    if (group == null) return proxyName; // not a group -> leaf proxy
+    if (group.type != GroupType.Selector) return group.name;
+    final now = group.now;
+    if (now == null || now.isEmpty) return proxyName;
+    if (now == 'DIRECT' || now == 'REJECT') return now;
+    return resolveToDisplayName(now, depth + 1);
+  }
 }
 
 extension GroupExt on Group {

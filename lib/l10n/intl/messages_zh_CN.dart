@@ -151,6 +151,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "coreInfo": MessageLookupByLibrary.simpleMessage("内核信息"),
     "country": MessageLookupByLibrary.simpleMessage("区域"),
     "crashTest": MessageLookupByLibrary.simpleMessage("崩溃测试"),
+    "crashlytics": MessageLookupByLibrary.simpleMessage("崩溃报告"),
+    "crashlyticsDesc": MessageLookupByLibrary.simpleMessage(
+      "通过 Firebase Crashlytics 自动上传崩溃日志，不包含敏感信息",
+    ),
     "create": MessageLookupByLibrary.simpleMessage("创建"),
     "cut": MessageLookupByLibrary.simpleMessage("剪切"),
     "dark": MessageLookupByLibrary.simpleMessage("深色"),
@@ -328,6 +332,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "开启后，将只统计代理流量",
     ),
     "openLogsFolder": MessageLookupByLibrary.simpleMessage("打开日志文件夹"),
+    "openPanel": MessageLookupByLibrary.simpleMessage("打开面板"),
     "options": MessageLookupByLibrary.simpleMessage("选项"),
     "originalRepository": MessageLookupByLibrary.simpleMessage("原始存储库"),
     "other": MessageLookupByLibrary.simpleMessage("其他"),
@@ -536,6 +541,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "webDAVConfiguration": MessageLookupByLibrary.simpleMessage("WebDAV配置"),
     "whitelistMode": MessageLookupByLibrary.simpleMessage("白名单模式"),
     "years": MessageLookupByLibrary.simpleMessage("年"),
+    "zashboardInApp": MessageLookupByLibrary.simpleMessage("在应用内打开 zashboard"),
+    "zashboardInAppDesc": MessageLookupByLibrary.simpleMessage(
+      "使用内置浏览器显示控制面板，无需跳转到外部浏览器",
+    ),
     "zh_CN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };
 }

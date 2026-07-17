@@ -35,6 +35,9 @@ Future<void> main() async {
     // Accessing the singletons wires up method channel handlers.
     vpn;
     _wireAndroidTileListener();
+    unawaited(
+      clashLib?.setCrashlytics(globalState.config.appSetting.crashlytics),
+    );
   }
 
   HttpOverrides.global = FlClashHttpOverrides();
@@ -131,31 +134,7 @@ String _buildNotificationTitle(Profile? profile) {
     }
   }
 
-  final displayName = serviceName.isNotEmpty ? serviceName : profileName;
-
-  String serverName = '';
-  final serverInfoHeader = profile.providerHeaders['flclashx-serverinfo'];
-  if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
-    String decodedGroupName;
-    try {
-      final normalized = base64.normalize(serverInfoHeader);
-      decodedGroupName = utf8.decode(base64.decode(normalized)).trim();
-    } catch (_) {
-      decodedGroupName = serverInfoHeader.trim();
-    }
-    serverName = profile.selectedMap[decodedGroupName] ?? '';
-  }
-  if (serverName.isEmpty) {
-    for (final entry in profile.selectedMap.entries) {
-      final v = entry.value;
-      if (v.isNotEmpty && v != 'DIRECT' && v != 'REJECT') {
-        serverName = v;
-        break;
-      }
-    }
-  }
-
-  return serverName.isNotEmpty ? '$displayName / $serverName' : displayName;
+  return serviceName.isNotEmpty ? serviceName : profileName;
 }
 
 Future<void> _handleStop() async {

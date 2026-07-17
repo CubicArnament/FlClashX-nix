@@ -312,6 +312,10 @@ class RemoteService : Service() {
             Core.setState(state)
         }
 
+        override fun setCrashlytics(enable: Boolean) {
+            GlobalState.setCrashlytics(enable)
+        }
+
         override fun updateDns(dns: String) {
             Core.updateDns(dns)
         }

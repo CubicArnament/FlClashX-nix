@@ -16,6 +16,7 @@ import com.follow.clashx.RunState
 import com.follow.clashx.Service
 import com.follow.clashx.common.Components
 import com.follow.clashx.common.GlobalState as CommonGlobalState
+import com.follow.clashx.common.SavedParams
 import com.follow.clashx.service.models.NotificationParams
 import com.follow.clashx.service.models.VpnOptions
 import com.follow.clashx.service.models.gsonSanitized
@@ -88,6 +89,15 @@ class ServicePlugin :
                 val data = call.arguments<String>() ?: ""
                 Service.setState(data)
                 result.successOnMain(true)
+            }
+            "setCrashlytics" -> {
+                val enable = call.arguments<Boolean>() ?: true
+                SavedParams.setCrashlyticsEnabled(enable)
+                CommonGlobalState.setCrashlytics(enable)
+                launch {
+                    Service.setCrashlytics(enable)
+                    result.successOnMain(true)
+                }
             }
             "updateDns" -> launch {
                 val data = call.arguments<String>() ?: ""

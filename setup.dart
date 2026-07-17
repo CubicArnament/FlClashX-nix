@@ -145,6 +145,15 @@ class Build {
 
   static String get distPath => join(current, "dist");
 
+  // Full release version for the User-Agent, taken from the CI tag
+  // (GITHUB_REF_NAME, e.g. "v0.4.1-pre.18"), baked in via --dart-define=APP_VERSION.
+  // Only a version tag counts — a branch name (e.g. "dev") is ignored, so local
+  // and branch builds fall back to the pubspec version at runtime.
+  static String get appVersion {
+    final ref = Platform.environment["GITHUB_REF_NAME"]?.trim() ?? "";
+    return RegExp(r'^v\d').hasMatch(ref) ? ref : "";
+  }
+
   static String _getCc(BuildItem buildItem) {
     final environment = Platform.environment;
     if (buildItem.target == Target.android) {
@@ -519,6 +528,7 @@ class BuildCommand extends Command {
         "--release",
         "--dart-define=APP_ENV=$env",
         "--dart-define=CORE_VERSION=$coreVersion",
+        "--dart-define=APP_VERSION=${Build.appVersion}",
       ],
     );
 
@@ -583,6 +593,7 @@ class BuildCommand extends Command {
         "--dart-define=APP_ENV=$env",
         "--dart-define=CORE_SHA256=$token",
         "--dart-define=CORE_VERSION=$coreVersion",
+        "--dart-define=APP_VERSION=${Build.appVersion}",
       ],
     );
 
@@ -680,6 +691,7 @@ class BuildCommand extends Command {
         "--target-platform=${targetMap[arch]}",
         "--dart-define=APP_ENV=$env",
         "--dart-define=CORE_VERSION=$coreVersion",
+        "--dart-define=APP_VERSION=${Build.appVersion}",
       ],
     );
 
@@ -908,6 +920,7 @@ class BuildCommand extends Command {
         "--split-per-abi",
         "--dart-define=APP_ENV=$env",
         "--dart-define=CORE_VERSION=$coreVersion",
+        "--dart-define=APP_VERSION=${Build.appVersion}",
       ],
     );
 
@@ -930,6 +943,7 @@ class BuildCommand extends Command {
         "flutter", "build", "apk", "--release",
         "--dart-define=APP_ENV=$env",
         "--dart-define=CORE_VERSION=$coreVersion",
+        "--dart-define=APP_VERSION=${Build.appVersion}",
       ],
     );
     Build.copyFile(
