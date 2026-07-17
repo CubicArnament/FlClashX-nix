@@ -2,6 +2,8 @@ package com.follow.clashx.common
 
 import android.app.Application
 import android.util.Log
+import com.google.firebase.FirebaseApp
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +37,13 @@ object GlobalState {
         Log.d(TAG, message)
     }
 
-    fun setCrashlytics(@Suppress("UNUSED_PARAMETER") enable: Boolean) {
+    fun setCrashlytics(enable: Boolean) {
+        runCatching {
+            // initializeApp returns null when the APK carries no Firebase config
+            // (built without google-services.json) — degrade to a no-op then.
+            FirebaseApp.initializeApp(application) ?: return
+            FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = enable
+            log("crashlytics collection enabled=$enable")
+        }.onFailure { log("setCrashlytics($enable) error: ${it.message}") }
     }
 }

@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import com.follow.clashx.common.GlobalState as CommonGlobalState
+import com.follow.clashx.common.SavedParams
 
 class FlClashXApplication : Application() {
     companion object {
@@ -15,6 +16,9 @@ class FlClashXApplication : Application() {
         super.onCreate()
         instance = this
         CommonGlobalState.init(this)
+        // Before the main-process gate: :remote and headless starts must apply
+        // the persisted flag too.
+        CommonGlobalState.setCrashlytics(SavedParams.isCrashlyticsEnabled())
         if (isMainProcess()) {
             GlobalState.install()
         }

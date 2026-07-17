@@ -152,8 +152,8 @@ class FlVpnService : VpnService(), IBaseService {
         // A null intent here is a START_STICKY auto-restart by the OS (every explicit
         // start — app-driven, tile, boot — passes a non-null Intent). onCreate has
         // already promoted the foreground notification; if there is no VPN to recover,
-        // don't let that notification linger over a non-running core (the "висит до
-        // последнего" orphan after an OEM force-stop). A genuinely-active tunnel
+        // don't let that notification linger over a non-running core (the
+        // "hangs-on-forever" orphan after an OEM force-stop). A genuinely-active tunnel
         // (isVpnActive) still falls through to coldStart and is restored.
         if (intent == null && !SavedParams.isVpnActive()) {
             GlobalState.log("FlVpnService: sticky restart with no active VPN, stopping")

@@ -9,11 +9,13 @@ object SavedParams {
     private const val ACTIVE_FILE = "flclashx_vpn_active"
     private const val NOTIF_TITLE_FILE = "flclashx_notif_title"
     private const val START_TIME_FILE = "flclashx_start_time"
+    private const val CRASHLYTICS_OPTOUT_FILE = "flclashx_crashlytics_optout"
 
     private val paramsFile by lazy { File(GlobalState.application.filesDir, PARAMS_FILE) }
     private val activeFile by lazy { File(GlobalState.application.filesDir, ACTIVE_FILE) }
     private val notifTitleFile by lazy { File(GlobalState.application.filesDir, NOTIF_TITLE_FILE) }
     private val startTimeFile by lazy { File(GlobalState.application.filesDir, START_TIME_FILE) }
+    private val crashlyticsOptOutFile by lazy { File(GlobalState.application.filesDir, CRASHLYTICS_OPTOUT_FILE) }
 
     data class QuickStartParams(val init: String, val setup: String, val state: String)
 
@@ -65,6 +67,20 @@ object SavedParams {
     }
 
     fun isVpnActive(): Boolean = activeFile.exists()
+
+    // Marker file encodes opt-OUT so that a fresh install (no data at all)
+    // means "enabled" — the default is on.
+    fun setCrashlyticsEnabled(enable: Boolean) {
+        runCatching {
+            if (enable) {
+                crashlyticsOptOutFile.delete()
+            } else {
+                crashlyticsOptOutFile.writeText("1")
+            }
+        }.onFailure { GlobalState.log("setCrashlyticsEnabled($enable) error: ${it.message}") }
+    }
+
+    fun isCrashlyticsEnabled(): Boolean = !crashlyticsOptOutFile.exists()
 
     // Persisted tunnel start timestamp (epoch ms). Lets a freshly-restarted UI process
     // recover the real uptime — and confirm the tunnel is up — when the AIDL runtime

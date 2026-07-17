@@ -18,7 +18,7 @@ import 'requests.dart';
 
 enum _ConnTab { active, log }
 
-/// The merged "Подключения" page: one nav entry hosting an Active/Log segmented
+/// The merged "Connections" page: one nav entry hosting an Active/Log segmented
 /// switch over an IndexedStack of the two bodies. Owns the shared app-bar (actions,
 /// search, keyword chips) and routes the close-all action to the Active tab only.
 class ConnectionsView extends ConsumerStatefulWidget {

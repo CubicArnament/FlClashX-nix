@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flclashx/clash/lib.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/plugins/app.dart';
 import 'package:flclashx/providers/config.dart';
@@ -187,6 +188,32 @@ class UsageItem extends ConsumerWidget {
                   onlyStatisticsProxy: value,
                 ),
               );
+        },
+      ),
+    );
+  }
+}
+
+class CrashlyticsItem extends ConsumerWidget {
+  const CrashlyticsItem({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final crashlytics = ref.watch(
+      appSettingProvider.select((state) => state.crashlytics),
+    );
+    return ListItem.switchItem(
+      title: Text(appLocalizations.crashlytics),
+      subtitle: Text(appLocalizations.crashlyticsDesc),
+      delegate: SwitchDelegate(
+        value: crashlytics,
+        onChanged: (bool value) async {
+          ref.read(appSettingProvider.notifier).updateState(
+                (state) => state.copyWith(
+                  crashlytics: value,
+                ),
+              );
+          await clashLib?.setCrashlytics(value);
         },
       ),
     );
@@ -529,6 +556,7 @@ class ApplicationSettingView extends StatelessWidget {
         HiddenItem(),
         BatteryOptimizationItem(),
         AutoStartItem(),
+        CrashlyticsItem(),
       ],
       AnimateTabItem(),
       OpenLogsItem(),

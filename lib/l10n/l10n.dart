@@ -1984,6 +1984,26 @@ class AppLocalizations {
     );
   }
 
+  /// `Crash reports`
+  String get crashlytics {
+    return Intl.message(
+      'Crash reports',
+      name: 'crashlytics',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Automatically upload crash logs via Firebase Crashlytics; no sensitive data is included`
+  String get crashlyticsDesc {
+    return Intl.message(
+      'Automatically upload crash logs via Firebase Crashlytics; no sensitive data is included',
+      name: 'crashlyticsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Pure black mode`
   String get pureBlackMode {
     return Intl.message(

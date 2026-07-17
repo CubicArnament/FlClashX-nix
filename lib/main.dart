@@ -35,6 +35,9 @@ Future<void> main() async {
     // Accessing the singletons wires up method channel handlers.
     vpn;
     _wireAndroidTileListener();
+    unawaited(
+      clashLib?.setCrashlytics(globalState.config.appSetting.crashlytics),
+    );
   }
 
   HttpOverrides.global = FlClashHttpOverrides();
