@@ -2,6 +2,7 @@ import Cocoa
 import FlutterMacOS
 import window_manager
 import LaunchAtLogin
+import desktop_multi_window
 
 class MainFlutterWindow: NSWindow {
     override func awakeFromNib() {
@@ -28,6 +29,15 @@ class MainFlutterWindow: NSWindow {
         }
         
         RegisterGeneratedPlugins(registry: flutterViewController)
+
+        // Register plugins for each desktop_multi_window sub-window (the macOS
+        // config editor) so its engine has the multi-window channel. Its Dart
+        // only uses that channel; the rest register but stay dormant unless
+        // called, so no duplicate tray/window side effects.
+        FlutterMultiWindowPlugin.setOnWindowCreatedCallback { controller in
+            RegisterGeneratedPlugins(registry: controller)
+        }
+
         super.awakeFromNib()
     }
     override public func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {

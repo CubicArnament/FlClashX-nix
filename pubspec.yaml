@@ -16,6 +16,7 @@ dependencies:
   path: ^1.9.1
   shared_preferences: ^2.3.5
   window_manager: ^0.5.1
+  desktop_multi_window: ^0.3.0
   dynamic_color: ^1.8.1
   proxy:
     path: plugins/proxy

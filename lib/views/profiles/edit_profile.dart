@@ -7,6 +7,7 @@ import 'package:flclashx/common/common.dart';
 import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/models/models.dart';
 import 'package:flclashx/pages/editor.dart';
+import 'package:flclashx/pages/editor_window.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -149,6 +150,37 @@ class _EditProfileViewState extends State<EditProfileView> {
     }
     if (!mounted) return;
     final title = widget.profile.label ?? widget.profile.id;
+
+    // macOS lives in the tray popover — too cramped to edit a config. Open it in
+    // a standalone native window (its own engine, see editor_window). Its Save
+    // round-trips here to validate + persist via the core, then closes.
+    if (Platform.isMacOS) {
+      await EditorWindowBridge.open(
+        title: title,
+        content: rawText!,
+        isDark: Theme.of(context).brightness == Brightness.dark,
+        saveLabel: appLocalizations.save,
+        onSave: (content) async {
+          try {
+            final saved = await widget.profile.saveFileWithString(content);
+            globalState.appController.setProfileAndAutoApply(saved);
+            if (mounted) {
+              rawText = content;
+              fileData = null;
+              fileInfoNotifier.value = fileInfoNotifier.value?.copyWith(
+                size: utf8.encode(content).length,
+                lastModified: DateTime.now(),
+              );
+            }
+            return null;
+          } catch (e) {
+            return e.toString();
+          }
+        },
+      );
+      return;
+    }
+
     final editorPage = EditorPage(
       title: title,
       content: rawText!,
