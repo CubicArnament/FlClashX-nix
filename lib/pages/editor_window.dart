@@ -39,7 +39,6 @@ Future<void> runEditorSubWindow(List<String> args) async {
       ? jsonDecode(args[2]) as Map<String, dynamic>
       : const <String, dynamic>{};
   final title = (argument['title'] as String?) ?? '';
-
   await windowManager.ensureInitialized();
   unawaited(
     windowManager.waitUntilReadyToShow(
@@ -50,7 +49,6 @@ Future<void> runEditorSubWindow(List<String> args) async {
       },
     ),
   );
-
   runApp(
     _EditorWindowApp(
       title: title,
@@ -308,6 +306,8 @@ class EditorWindowBridge {
   }) async {
     _ensureHandler();
     _onSave = onSave;
+    // The sub-window sizes/shows/focuses itself via window_manager (see
+    // runEditorSubWindow), so create() alone is enough here.
     await WindowController.create(
       WindowConfiguration(
         arguments: jsonEncode({
