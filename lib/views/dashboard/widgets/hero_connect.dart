@@ -265,13 +265,10 @@ class HeroConnect extends ConsumerWidget {
     var serverName = '';
     String? testUrl;
     Group? activeGroup;
-    // Host name = the current selection of the proxy group named in the
-    // `flclashx-serverinfo` header, resolved through nested Selector groups to
-    // the leaf — but any non-selector group (url-test / fallback / load-balance /
-    // relay) resolves to its own name instead, since it has no single stable host
-    // to show (see resolveToDisplayName). Fall back to the first real group.
-    // Resolve from the group name (not its `now`) so a group that is itself such
-    // a type is caught too.
+    // Server label = the current pick of the proxy group named in the
+    // `flclashx-serverinfo` header: its selected leaf host (the real location),
+    // or the sub-group's own name when the pick is itself a group (see
+    // resolveToDisplayName). Fall back to the first group with a live selection.
     final serverInfoHeader = headers['flclashx-serverinfo'];
     if (serverInfoHeader != null && serverInfoHeader.isNotEmpty) {
       final groupName = _decodeBase64(serverInfoHeader) ?? serverInfoHeader.trim();
