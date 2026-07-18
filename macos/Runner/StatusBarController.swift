@@ -179,12 +179,16 @@ class ZashboardWindowController: NSObject, NSWindowDelegate {
     }
 
     func windowWillClose(_ notification: Notification) {
-        // Stop the dashboard polling the core in the background, then return to
-        // being a plain menu-bar app.
-        if let blank = URL(string: "about:blank") {
-            webView?.load(URLRequest(url: blank))
-        }
         NSApp.setActivationPolicy(.accessory)
+        // Fully tear down the WKWebView so its helper processes (the "about:"
+        // WebContent, "Graphics and media", "Networking") terminate instead of
+        // lingering in memory — reusing it kept them alive. show() recreates the
+        // window and web view on the next open.
+        webView?.stopLoading()
+        window?.contentView = nil
+        webView = nil
+        window?.delegate = nil
+        window = nil
         onClosed()
     }
 }
