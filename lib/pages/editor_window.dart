@@ -154,6 +154,13 @@ class _EditorWindowState extends State<_EditorWindow> {
   Future<void> _save() async {
     if (_saving) return;
 
+    // Nothing changed → just close, no save and no auto-update prompt (mirrors
+    // the in-app editor, which disables Save when the text is untouched).
+    if (_controller.text == widget.content) {
+      await windowManager.close();
+      return;
+    }
+
     // URL profile with auto-update on: manual edits get overwritten on the next
     // update, so offer to disable it — same prompt the in-app editor shows.
     var disableAutoUpdate = false;
