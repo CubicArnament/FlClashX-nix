@@ -188,6 +188,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage("添加配置文件从"),
     "domain": MessageLookupByLibrary.simpleMessage("域名"),
     "download": MessageLookupByLibrary.simpleMessage("下载"),
+    "downloadingZashboard": MessageLookupByLibrary.simpleMessage(
+      "正在下载 Zashboard…",
+    ),
     "edit": MessageLookupByLibrary.simpleMessage("编辑"),
     "emptyTip": m2,
     "en": MessageLookupByLibrary.simpleMessage("英语"),
@@ -218,6 +221,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "file": MessageLookupByLibrary.simpleMessage("文件"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("直接上传配置文件"),
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage("文件有修改，是否保存修改"),
+    "fileTooLarge": MessageLookupByLibrary.simpleMessage("文件过大"),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage("过滤系统应用"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("查找进程"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage("开启后会有一定性能损耗"),

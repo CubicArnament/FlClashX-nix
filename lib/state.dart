@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
 import 'package:material_color_utilities/palettes/core_palette.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
 import 'common/common.dart';
@@ -517,11 +518,16 @@ class GlobalState {
     rawConfig["external-controller"] = effectiveExternalControllerValue;
     effectiveExternalController.value = effectiveExternalControllerValue;
     effectiveSecret.value = (rawConfig["secret"] as String?)?.trim() ?? "";
-    effectiveExternalUi.value =
-        (rawConfig["external-ui"] as String?)?.trim() ?? "";
-    if (rawConfig["external-ui"] == null || rawConfig["external-ui"] == "") {
-      rawConfig["external-ui"] = "";
-    }
+    // Always point the core at a local dir so it serves the dashboard at /ui/
+    // on the same host:port as the controller (same origin, plain http — no
+    // public instance, no mixed content). The app downloads zashboard into this
+    // dir on demand (ensureZashboardUi). A profile may override external-ui.
+    final providerUi = (rawConfig["external-ui"] as String?)?.trim() ?? "";
+    final uiDir = providerUi.isNotEmpty
+        ? providerUi
+        : p.join(await appPath.homeDirPath, "zashboard");
+    rawConfig["external-ui"] = uiDir;
+    effectiveExternalUi.value = uiDir;
     rawConfig["interface-name"] = "";
     if (rawConfig["external-ui-url"] == null || rawConfig["external-ui-url"] == "") {
       rawConfig["external-ui-url"] = "";

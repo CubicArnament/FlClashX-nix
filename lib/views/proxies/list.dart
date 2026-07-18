@@ -321,13 +321,13 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
         });
         
         return RepaintBoundary(
-          child: FocusTraversalGroup(
-            // ReadingOrder, not Ordered: there are no FocusTraversalOrder widgets
-            // anywhere for OrderedTraversalPolicy to sort by, so it fell back to
-            // undefined ordering. ReadingOrder gives the proxy grid a stable
-            // left-to-right / top-to-bottom tab order.
-            policy: ReadingOrderTraversalPolicy(),
-            child: Expansible(
+          // No per-group FocusTraversalGroup: wrapping each card in its own
+          // traversal group made every group a membrane the D-pad had to step
+          // out of and back into, costing an extra press to cross between groups.
+          // The whole list shares the outer group (ProxiesListView), so
+          // directional nav flows straight through; ExcludeFocus still keeps a
+          // folded group's hidden proxies out of the traversal.
+          child: Expansible(
               controller: _expansibleController,
               headerBuilder: (context, animation) => GestureDetector(
                 onTap: () => _toggleExpansion(unfoldSet),
@@ -389,14 +389,26 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
                           // available while collapsed too (previously expand-only),
                           // which also gives the TV D-pad a focus target on a
                           // folded group.
+                          //
+                          // Both header buttons share the exact same box so their
+                          // top/bottom edges line up. With a D-pad, a vertical press
+                          // then can't land on the horizontal sibling (which had a
+                          // taller filled-tonal box), so up/down moves straight to
+                          // the next/previous group in one press; left/right switches
+                          // between ping and expand within the group.
                           IconButton(
                             onPressed: _delayTest,
-                            visualDensity: VisualDensity.standard,
+                            padding: EdgeInsets.zero,
+                            constraints:
+                                const BoxConstraints.tightFor(width: 40, height: 40),
                             icon: const Icon(Icons.network_ping),
                           ),
                           const SizedBox(width: 6),
                           IconButton.filledTonal(
                             onPressed: () => _toggleExpansion(unfoldSet),
+                            padding: EdgeInsets.zero,
+                            constraints:
+                                const BoxConstraints.tightFor(width: 40, height: 40),
                             icon: CommonExpandIcon(expand: isExpand),
                           ),
                         ],
@@ -429,7 +441,6 @@ class _ProxyGroupCardState extends State<ProxyGroupCard>
               expansibleBuilder: (context, header, body, animation) =>
                   Column(children: [header, body]),
             ),
-          ),
         );
       },
     );

@@ -202,6 +202,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "doYouWantToPass": MessageLookupByLibrary.simpleMessage("プロファイルを追加中"),
     "domain": MessageLookupByLibrary.simpleMessage("ドメイン"),
     "download": MessageLookupByLibrary.simpleMessage("ダウンロード"),
+    "downloadingZashboard": MessageLookupByLibrary.simpleMessage(
+      "Zashboard をダウンロード中…",
+    ),
     "edit": MessageLookupByLibrary.simpleMessage("編集"),
     "emptyTip": m2,
     "en": MessageLookupByLibrary.simpleMessage("英語"),
@@ -236,6 +239,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "ファイルが変更されました。保存しますか？",
     ),
+    "fileTooLarge": MessageLookupByLibrary.simpleMessage("ファイルが大きすぎます"),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage("システムアプリを除外"),
     "findProcessMode": MessageLookupByLibrary.simpleMessage("プロセス検出"),
     "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(

@@ -294,6 +294,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "domain": MessageLookupByLibrary.simpleMessage("Domain"),
     "download": MessageLookupByLibrary.simpleMessage("Download"),
+    "downloadingZashboard": MessageLookupByLibrary.simpleMessage(
+      "Downloading Zashboard…",
+    ),
     "edit": MessageLookupByLibrary.simpleMessage("Edit"),
     "emptyTip": m2,
     "en": MessageLookupByLibrary.simpleMessage("English"),
@@ -338,6 +341,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "The file has been modified. Do you want to save the changes?",
     ),
+    "fileTooLarge": MessageLookupByLibrary.simpleMessage("File is too large"),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage(
       "Filter system app",
     ),
