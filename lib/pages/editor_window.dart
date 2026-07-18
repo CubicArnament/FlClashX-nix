@@ -57,6 +57,11 @@ Future<void> runEditorSubWindow(List<String> args) async {
       content: (argument['content'] as String?) ?? '',
       isDark: argument['isDark'] == true,
       saveLabel: (argument['saveLabel'] as String?) ?? 'Save',
+      promptAutoUpdate: argument['promptAutoUpdate'] == true,
+      promptTitle: (argument['promptTitle'] as String?) ?? '',
+      promptMessage: (argument['promptMessage'] as String?) ?? '',
+      confirmLabel: (argument['confirmLabel'] as String?) ?? 'OK',
+      cancelLabel: (argument['cancelLabel'] as String?) ?? 'Cancel',
     ),
   );
 }
@@ -67,12 +72,22 @@ class _EditorWindowApp extends StatelessWidget {
     required this.content,
     required this.isDark,
     required this.saveLabel,
+    required this.promptAutoUpdate,
+    required this.promptTitle,
+    required this.promptMessage,
+    required this.confirmLabel,
+    required this.cancelLabel,
   });
 
   final String title;
   final String content;
   final bool isDark;
   final String saveLabel;
+  final bool promptAutoUpdate;
+  final String promptTitle;
+  final String promptMessage;
+  final String confirmLabel;
+  final String cancelLabel;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -86,6 +101,11 @@ class _EditorWindowApp extends StatelessWidget {
           content: content,
           isDark: isDark,
           saveLabel: saveLabel,
+          promptAutoUpdate: promptAutoUpdate,
+          promptTitle: promptTitle,
+          promptMessage: promptMessage,
+          confirmLabel: confirmLabel,
+          cancelLabel: cancelLabel,
         ),
       );
 }
@@ -96,12 +116,22 @@ class _EditorWindow extends StatefulWidget {
     required this.content,
     required this.isDark,
     required this.saveLabel,
+    required this.promptAutoUpdate,
+    required this.promptTitle,
+    required this.promptMessage,
+    required this.confirmLabel,
+    required this.cancelLabel,
   });
 
   final String title;
   final String content;
   final bool isDark;
   final String saveLabel;
+  final bool promptAutoUpdate;
+  final String promptTitle;
+  final String promptMessage;
+  final String confirmLabel;
+  final String cancelLabel;
 
   @override
   State<_EditorWindow> createState() => _EditorWindowState();
@@ -125,12 +155,40 @@ class _EditorWindowState extends State<_EditorWindow> {
 
   Future<void> _save() async {
     if (_saving) return;
+
+    // URL profile with auto-update on: manual edits get overwritten on the next
+    // update, so offer to disable it — same prompt the in-app editor shows.
+    var disableAutoUpdate = false;
+    if (widget.promptAutoUpdate) {
+      final res = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(widget.promptTitle),
+          content: Text(widget.promptMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(widget.cancelLabel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(widget.confirmLabel),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      disableAutoUpdate = res == true;
+    }
+
     setState(() => _saving = true);
     try {
       // The main engine owns the core — it validates + persists and returns an
       // error message, or null on success.
-      final error =
-          await _editorChannel.invokeMethod<String>('saveConfig', _controller.text);
+      final error = await _editorChannel.invokeMethod<String>('saveConfig', {
+        'content': _controller.text,
+        'disableAutoUpdate': disableAutoUpdate,
+      });
       if (error != null && error.isNotEmpty) {
         if (!mounted) return;
         setState(() => _saving = false);
@@ -205,9 +263,11 @@ class _EditorWindowState extends State<_EditorWindow> {
 // Main-window side — runs in the app's main engine/isolate.
 // ---------------------------------------------------------------------------
 
-/// Validates + persists [content], returning null on success or an error
-/// message to show in the editor window.
-typedef EditorSaveHandler = Future<String?> Function(String content);
+/// Validates + persists [content] (disabling auto-update when
+/// [disableAutoUpdate]), returning null on success or an error message to show
+/// in the editor window.
+typedef EditorSaveHandler = Future<String?> Function(
+    String content, bool disableAutoUpdate);
 
 class EditorWindowBridge {
   EditorWindowBridge._();
@@ -222,7 +282,11 @@ class EditorWindowBridge {
       if (call.method == 'saveConfig') {
         final onSave = _onSave;
         if (onSave == null) return 'no active editor';
-        return onSave(call.arguments as String);
+        final args = call.arguments as Map;
+        return onSave(
+          args['content'] as String,
+          args['disableAutoUpdate'] == true,
+        );
       }
       return null;
     });
@@ -235,6 +299,11 @@ class EditorWindowBridge {
     required String content,
     required bool isDark,
     required String saveLabel,
+    required bool promptAutoUpdate,
+    required String promptTitle,
+    required String promptMessage,
+    required String confirmLabel,
+    required String cancelLabel,
     required EditorSaveHandler onSave,
   }) async {
     _ensureHandler();
@@ -246,6 +315,11 @@ class EditorWindowBridge {
           'content': content,
           'isDark': isDark,
           'saveLabel': saveLabel,
+          'promptAutoUpdate': promptAutoUpdate,
+          'promptTitle': promptTitle,
+          'promptMessage': promptMessage,
+          'confirmLabel': confirmLabel,
+          'cancelLabel': cancelLabel,
         }),
       ),
     );

@@ -160,13 +160,27 @@ class _EditProfileViewState extends State<EditProfileView> {
         content: rawText!,
         isDark: Theme.of(context).brightness == Brightness.dark,
         saveLabel: appLocalizations.save,
-        onSave: (content) async {
+        // A URL profile with auto-update on would overwrite manual edits on its
+        // next refresh — the window asks whether to disable auto-update, exactly
+        // like _handleConfirm does for the in-app editor.
+        promptAutoUpdate: widget.profile.type == ProfileType.url && autoUpdate,
+        promptTitle: appLocalizations.tip,
+        promptMessage: appLocalizations.profileHasUpdate,
+        confirmLabel: appLocalizations.confirm,
+        cancelLabel: appLocalizations.cancel,
+        onSave: (content, disableAutoUpdate) async {
           try {
-            final saved = await widget.profile.saveFileWithString(content);
+            var saved = await widget.profile.saveFileWithString(content);
+            if (disableAutoUpdate) {
+              saved = saved.copyWith(autoUpdate: false);
+            }
             globalState.appController.setProfileAndAutoApply(saved);
             if (mounted) {
               rawText = content;
               fileData = null;
+              if (disableAutoUpdate) {
+                setState(() => autoUpdate = false);
+              }
               fileInfoNotifier.value = fileInfoNotifier.value?.copyWith(
                 size: utf8.encode(content).length,
                 lastModified: DateTime.now(),
