@@ -1,3 +1,29 @@
+## v0.4.2
+
+- release 0.4.2
+
+- bump 0.4.2
+
+- fix macos zashboard webview lingering after close
+
+- macos config editor close without prompt when unchanged
+
+- fix macos editor window engine leak on close
+
+- macos config editor auto-update prompt
+
+- macos config editor in native window
+
+- macos zashboard in native webview window
+
+- fix server card and hero location display
+
+- fix file_picker oom, remove file upload buttons, local zashboard, fix fgs startForeground crash
+
+- fix macos zashboard, tv proxy dpad nav, zashboard auto controller, linux journal icons
+
+- Update changelog
+
 ## v0.4.1
 
 - Merge branch 'dev'
