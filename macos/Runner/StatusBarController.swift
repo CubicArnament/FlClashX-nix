@@ -1,6 +1,7 @@
 import AppKit
 import Cocoa
 import FlutterMacOS
+import WebKit
 
 class PopoverContainerViewController: NSViewController {
     let flutterViewController: FlutterViewController
@@ -124,6 +125,66 @@ class StatusBarController {
             }
         }
     }
-    
 
+
+}
+
+/// A standalone window hosting a native WKWebView, used on macOS to show
+/// zashboard outside the tray popover. The popover mis-maps platform-view
+/// pointer input (every click lands offset), so an in-Flutter webview there is
+/// unusable; a plain WKWebView in a real NSWindow has none of that and gives the
+/// dashboard proper space. The app is `LSUIElement` (accessory), so it is
+/// promoted to `.regular` while the window is open and dropped back to
+/// `.accessory` on close, so the window focuses and shows in Cmd-Tab normally.
+class ZashboardWindowController: NSObject, NSWindowDelegate {
+    private var window: NSWindow?
+    private var webView: WKWebView?
+    private let onClosed: () -> Void
+
+    init(onClosed: @escaping () -> Void) {
+        self.onClosed = onClosed
+        super.init()
+    }
+
+    func show(urlString: String) {
+        guard let url = URL(string: urlString) else { return }
+
+        NSApp.setActivationPolicy(.regular)
+
+        if window == nil {
+            let rect = NSRect(x: 0, y: 0, width: 1100, height: 720)
+            let w = NSWindow(
+                contentRect: rect,
+                styleMask: [.titled, .closable, .miniaturizable, .resizable],
+                backing: .buffered,
+                defer: false
+            )
+            w.title = "zashboard"
+            w.center()
+            w.isReleasedWhenClosed = false
+            w.minSize = NSSize(width: 640, height: 480)
+            w.delegate = self
+
+            let wv = WKWebView(frame: rect, configuration: WKWebViewConfiguration())
+            wv.autoresizingMask = [.width, .height]
+            w.contentView = wv
+
+            window = w
+            webView = wv
+        }
+
+        webView?.load(URLRequest(url: url))
+        window?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        // Stop the dashboard polling the core in the background, then return to
+        // being a plain menu-bar app.
+        if let blank = URL(string: "about:blank") {
+            webView?.load(URLRequest(url: blank))
+        }
+        NSApp.setActivationPolicy(.accessory)
+        onClosed()
+    }
 }
