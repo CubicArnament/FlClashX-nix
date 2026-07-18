@@ -16,7 +16,17 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// auto-managed — we can't detect when the external browser is closed, so there
 /// the controller is left as the user set it.
 Future<void> openZashboard(BuildContext context, {required bool inApp}) async {
-  final useWebView = inApp && ZashboardWebViewPage.supported;
+  // The core self-hosts the dashboard when external-ui is set — then the panel
+  // is a plain-http URL on the loopback controller (see buildZashboardUrl). The
+  // public fallback is https.
+  final isLocalPanel = globalState.effectiveExternalUi.value.trim().isNotEmpty;
+  // In-app webview on Android/iOS, and on macOS for the local http panel.
+  // Windows/Linux have no webview_flutter, so they open it in the external
+  // browser (the loopback-http URL works there too).
+  final canWebView = Platform.isAndroid ||
+      Platform.isIOS ||
+      (Platform.isMacOS && isLocalPanel);
+  final useWebView = inApp && canWebView;
   final controllerWasOff =
       globalState.effectiveExternalController.value.trim().isEmpty;
   final manageController = useWebView && controllerWasOff;
@@ -26,6 +36,21 @@ Future<void> openZashboard(BuildContext context, {required bool inApp}) async {
       await globalState.appController.setExternalControllerEnabled(true);
     } catch (_) {
       // If enabling failed the URL will still be empty below and we bail out.
+    }
+  }
+
+  // Local panel: the core serves the dashboard from the external-ui dir, so make
+  // sure it's downloaded before we open it (first use only, then cached).
+  if (isLocalPanel && !await isZashboardUiReady()) {
+    if (context.mounted) {
+      globalState.showNotifier(appLocalizations.downloadingZashboard);
+    }
+    final ok = await ensureZashboardUi();
+    if (!ok) {
+      if (manageController) {
+        await globalState.appController.setExternalControllerEnabled(false);
+      }
+      return;
     }
   }
 
@@ -77,11 +102,6 @@ class ZashboardWebViewPage extends StatefulWidget {
   final String url;
   final bool disableControllerOnClose;
 
-  /// webview_flutter ships no Windows/Linux implementation — callers fall back
-  /// to the external browser there.
-  static bool get supported =>
-      Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
-
   @override
   State<ZashboardWebViewPage> createState() => _ZashboardWebViewPageState();
 }
@@ -128,59 +148,97 @@ class _ZashboardWebViewPageState extends State<ZashboardWebViewPage> {
     super.dispose();
   }
 
-  Future<void> _handleBack() async {
-    if (await _controller.canGoBack()) {
-      await _controller.goBack();
-      return;
-    }
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
-  }
+  Widget _progressBar() => ValueListenableBuilder<int>(
+        valueListenable: _progress,
+        builder: (_, progress, __) {
+          if (progress >= 100) {
+            return const SizedBox.shrink();
+          }
+          return LinearProgressIndicator(
+            value: progress == 0 ? null : progress / 100,
+            minHeight: 2,
+          );
+        },
+      );
+
+  void _openExternally() => launchUrl(
+        Uri.parse(widget.url),
+        mode: LaunchMode.externalApplication,
+      );
 
   @override
-  Widget build(BuildContext context) => PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          _handleBack();
-        },
-        child: CommonScaffold(
-          title: 'zashboard',
-          actions: [
-            IconButton(
-              tooltip: appLocalizations.update,
-              icon: const Icon(Icons.refresh),
-              onPressed: _controller.reload,
-            ),
-            IconButton(
-              tooltip: appLocalizations.externalLink,
-              icon: const Icon(Icons.open_in_browser),
-              onPressed: () {
-                launchUrl(
-                  Uri.parse(widget.url),
-                  mode: LaunchMode.externalApplication,
-                );
-              },
-            ),
+  Widget build(BuildContext context) {
+    // macOS WKWebView maps pointer input from the platform view's own top edge,
+    // so any chrome ABOVE it (an app bar) shifted every click down by that
+    // chrome's height. Give the webview the full window height from y=0 and move
+    // the controls into a bottom bar, so its top edge is the window content top
+    // and clicks land under the cursor. Other platforms keep the normal top bar
+    // (their touch/pointer input is already correct). No PopScope anywhere: the
+    // back control just pops the route, so "back" always closes the panel.
+    if (Platform.isMacOS) {
+      final scheme = Theme.of(context).colorScheme;
+      return Scaffold(
+        body: Stack(
+          children: [
+            WebViewWidget(controller: _controller),
+            Positioned(top: 0, left: 0, right: 0, child: _progressBar()),
           ],
-          body: Stack(
-            children: [
-              WebViewWidget(controller: _controller),
-              ValueListenableBuilder<int>(
-                valueListenable: _progress,
-                builder: (_, progress, __) {
-                  if (progress >= 100) {
-                    return const SizedBox.shrink();
-                  }
-                  return LinearProgressIndicator(
-                    value: progress == 0 ? null : progress / 100,
-                    minHeight: 2,
-                  );
-                },
-              ),
-            ],
+        ),
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              color: scheme.surface,
+              border: Border(top: BorderSide(color: scheme.outlineVariant)),
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  tooltip: appLocalizations.exit,
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+                const SizedBox(width: 4),
+                const Text('zashboard'),
+                const Spacer(),
+                IconButton(
+                  tooltip: appLocalizations.update,
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _controller.reload,
+                ),
+                IconButton(
+                  tooltip: appLocalizations.externalLink,
+                  icon: const Icon(Icons.open_in_browser),
+                  onPressed: _openExternally,
+                ),
+              ],
+            ),
           ),
         ),
       );
+    }
+    return CommonScaffold(
+      title: 'zashboard',
+      actions: [
+        IconButton(
+          tooltip: appLocalizations.update,
+          icon: const Icon(Icons.refresh),
+          onPressed: _controller.reload,
+        ),
+        IconButton(
+          tooltip: appLocalizations.externalLink,
+          icon: const Icon(Icons.open_in_browser),
+          onPressed: _openExternally,
+        ),
+      ],
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          _progressBar(),
+        ],
+      ),
+    );
+  }
 }

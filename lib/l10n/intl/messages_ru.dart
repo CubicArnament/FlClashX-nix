@@ -303,6 +303,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "domain": MessageLookupByLibrary.simpleMessage("Домен"),
     "download": MessageLookupByLibrary.simpleMessage("Загрузка"),
+    "downloadingZashboard": MessageLookupByLibrary.simpleMessage(
+      "Качаю Zashboard…",
+    ),
     "edit": MessageLookupByLibrary.simpleMessage("Редактировать"),
     "emptyTip": m2,
     "en": MessageLookupByLibrary.simpleMessage("Английский"),
@@ -352,6 +355,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "fileIsUpdate": MessageLookupByLibrary.simpleMessage(
       "Файл был изменён. Сохранить изменения?",
+    ),
+    "fileTooLarge": MessageLookupByLibrary.simpleMessage(
+      "Файл слишком большой",
     ),
     "filterSystemApp": MessageLookupByLibrary.simpleMessage(
       "Фильтровать системные приложения",

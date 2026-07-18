@@ -188,16 +188,6 @@ class _EditProfileViewState extends State<EditProfileView> {
     );
   }
 
-  Future<void> _uploadProfileFile() async {
-    final platformFile = await globalState.safeRun(picker.pickerFile);
-    if (platformFile?.bytes == null) return;
-    fileData = platformFile?.bytes;
-    fileInfoNotifier.value = fileInfoNotifier.value?.copyWith(
-      size: fileData?.length ?? 0,
-      lastModified: DateTime.now(),
-    );
-  }
-
   Future<void> _handleBack() async {
     final res = await globalState.showMessage(
       title: appLocalizations.tip,
@@ -315,11 +305,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                               avatar: const Icon(Icons.edit),
                               label: appLocalizations.edit,
                               onPressed: _editProfileFile,
-                            ),
-                            CommonChip(
-                              avatar: const Icon(Icons.upload),
-                              label: appLocalizations.upload,
-                              onPressed: _uploadProfileFile,
                             ),
                           ],
                         ),

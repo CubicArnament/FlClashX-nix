@@ -108,6 +108,7 @@
   "urlDesc": "Obtain profile through URL",
   "file": "File",
   "fileDesc": "Directly upload profile",
+  "fileTooLarge": "File is too large",
   "name": "Name",
   "profileNameNullValidationDesc": "Please input the profile name",
   "profileUrlNullValidationDesc": "Please input the profile URL",
@@ -498,5 +499,6 @@
   "autoStartDesc": "Allow background autostart so the VPN survives reboots and updates (MIUI/EMUI etc.)",
   "zashboardInApp": "Open zashboard in the app",
   "zashboardInAppDesc": "Show the control panel in the built-in browser instead of switching to an external one",
-  "openPanel": "Open panel"
+  "openPanel": "Open panel",
+  "downloadingZashboard": "Downloading Zashboard…"
 }

@@ -82,6 +82,7 @@
   "urlDesc": "URL経由でプロファイルを取得",
   "file": "ファイル",
   "fileDesc": "プロファイルを直接アップロード",
+  "fileTooLarge": "ファイルが大きすぎます",
   "name": "名前",
   "profileNameNullValidationDesc": "プロファイル名を入力してください",
   "profileUrlNullValidationDesc": "プロファイルURLを入力してください",
@@ -445,5 +446,6 @@
   "autoStartDesc": "再起動や更新後もVPNが復帰するよう自動起動を許可します（MIUI/EMUIなど）",
   "zashboardInApp": "アプリ内で zashboard を開く",
   "zashboardInAppDesc": "外部ブラウザに切り替えず、内蔵ブラウザでパネルを表示します",
-  "openPanel": "パネルを開く"
+  "openPanel": "パネルを開く",
+  "downloadingZashboard": "Zashboard をダウンロード中…"
 }

@@ -874,6 +874,16 @@ class AppLocalizations {
     );
   }
 
+  /// `File is too large`
+  String get fileTooLarge {
+    return Intl.message(
+      'File is too large',
+      name: 'fileTooLarge',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Name`
   String get name {
     return Intl.message('Name', name: 'name', desc: '', args: []);
@@ -3917,6 +3927,16 @@ class AppLocalizations {
   /// `Open panel`
   String get openPanel {
     return Intl.message('Open panel', name: 'openPanel', desc: '', args: []);
+  }
+
+  /// `Downloading Zashboard…`
+  String get downloadingZashboard {
+    return Intl.message(
+      'Downloading Zashboard…',
+      name: 'downloadingZashboard',
+      desc: '',
+      args: [],
+    );
   }
 }
 

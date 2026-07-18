@@ -108,6 +108,7 @@
   "urlDesc": "Загрузить профиль по URL",
   "file": "Файл",
   "fileDesc": "Загрузить профиль из файла",
+  "fileTooLarge": "Файл слишком большой",
   "name": "Имя",
   "profileNameNullValidationDesc": "Пожалуйста, введите имя профиля",
   "profileUrlNullValidationDesc": "Пожалуйста, введите URL профиля",
@@ -499,5 +500,6 @@
   "autoStartDesc": "Разрешить автозапуск в фоне, чтобы VPN переживал перезагрузки и обновления (MIUI/EMUI и др.)",
   "zashboardInApp": "Открывать zashboard в приложении",
   "zashboardInAppDesc": "Показывать панель во встроенном браузере, не переключаясь на внешний",
-  "openPanel": "Открыть панель"
+  "openPanel": "Открыть панель",
+  "downloadingZashboard": "Качаю Zashboard…"
 }

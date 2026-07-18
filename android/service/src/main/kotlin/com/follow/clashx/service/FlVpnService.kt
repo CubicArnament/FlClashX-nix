@@ -129,6 +129,23 @@ class FlVpnService : VpnService(), IBaseService {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // startForegroundService() imposes a ~5s deadline to call startForeground()
+        // on EVERY delivery — including a stop delivered this way (GlobalState /
+        // RemoteService send the stop via startForegroundService), and any start
+        // that lands on an already-created instance (onCreate, which promotes, only
+        // runs on first creation). Promote here every time (idempotent) so the
+        // deadline is always met before we branch; missing it is exactly the
+        // ForegroundServiceDidNotStartInTimeException crash. If promotion is denied
+        // (A12+ background restriction), stop instead of lingering.
+        if (!promoteToForeground(
+                R.drawable.ic_notification,
+                SavedParams.loadNotificationTitle(),
+            )
+        ) {
+            GlobalState.log("FlVpnService: foreground promotion denied in onStartCommand, stopping")
+            stopSelf()
+            return START_NOT_STICKY
+        }
         if (intent?.action == ACTION_STOP) {
             GlobalState.launch {
                 State.runLock.withLock { handleStop() }

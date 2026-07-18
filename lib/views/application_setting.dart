@@ -6,7 +6,6 @@ import 'package:flclashx/common/common.dart';
 import 'package:flclashx/plugins/app.dart';
 import 'package:flclashx/providers/config.dart';
 import 'package:flclashx/state.dart';
-import 'package:flclashx/views/zashboard.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -588,9 +587,10 @@ class ApplicationSettingView extends StatelessWidget {
       OpenLogsItem(),
       CloseConnectionsItem(),
       AutoCheckUpdateItem(),
-      // The in-app webview has no Windows/Linux implementation — hide the
-      // toggle where it could never take effect.
-      if (ZashboardWebViewPage.supported) ZashboardInAppItem(),
+      // The in-app webview exists only on Android/iOS/macOS (webview_flutter);
+      // hide the toggle where it could never take effect.
+      if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
+        ZashboardInAppItem(),
       if (system.isDesktop) ...[
         Padding(
           padding: const EdgeInsets.only(top: 16),
