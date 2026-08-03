@@ -1,0 +1,36 @@
+name: nix-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      # Reuses Nix store paths through GitHub Actions' cache. The cache is an
+      # optimization only; every dependency remains pinned by flake.lock.
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Lint Nix
+        run: |
+          nix run nixpkgs#deadnix -- --fail .
+          nix run nixpkgs#statix -- check .
+
+      - name: Evaluate flake
+        run: nix flake check --no-build
+
+      - name: Dry-run Linux package
+        run: nix build .#flclashx --dry-run
+
+      - name: Dry-run Android package
+        run: nix build .#android-apk --dry-run

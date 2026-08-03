@@ -9,10 +9,9 @@ import 'package:flclashx/models/models.dart';
 import 'package:flutter/material.dart';
 
 const appName = "FlClashX";
-const appHelperService = "FlClashHelperService";
 const coreName = "clashx.meta";
 const browserUa =
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36";
 const packageName = "com.follow.clashx";
 final unixSocketPath = "/tmp/FlClashXSocket_${pid}_${Random.secure().nextInt(1 << 30)}.sock";
 const helperPort = 47890;
@@ -35,11 +34,7 @@ const mmdbFileName = "geoip.metadb";
 const asnFileName = "ASN.mmdb";
 const geoIpFileName = "GeoIP.dat";
 const geoSiteFileName = "GeoSite.dat";
-final double kHeaderHeight = system.isDesktop
-    ? !Platform.isMacOS
-        ? 40
-        : 28
-    : 0;
+final double kHeaderHeight = system.isDesktop ? 40 : 0;
 const profilesDirectoryName = "profiles";
 const localhost = "127.0.0.1";
 const clashConfigKey = "clash_config";

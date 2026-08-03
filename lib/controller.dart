@@ -16,7 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:path/path.dart' hide windows;
+import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -142,7 +142,6 @@ class AppController {
   }
 
   Future<void> _updateStatus(bool isStart) async {
-    await StatusBarManager.updateIcon(isConnected: isStart);
 
     if (isStart) {
       // Drop the previous exit-IP immediately so the panel shows "determining" right
@@ -157,7 +156,6 @@ class AppController {
         // Bring-up failed (VPN consent denied / establish failed): undo the
         // optimistic "connected" UI instead of leaving a ticking-but-dead state
         // that never self-heals.
-        await StatusBarManager.updateIcon(isConnected: false);
         stopRunTimeTimer();
         _ref.read(runTimeProvider.notifier).value = null;
         addCheckIpNumDebounce();
@@ -1008,20 +1006,12 @@ class AppController {
   }
 
   Future<void> handleExit() async {
-    // Bound the cleanup instead of pre-arming a 300ms hard-exit timer. On macOS the
-    // DNS/proxy teardown is several slow networksetup/route subprocesses that easily
-    // overrun 300ms, so the old timer fired mid-cleanup and exit(0) skipped the DNS
-    // restore / proxy stop / core shutdown — leaking 1.1.1.1, leaving a dead system
-    // proxy, and orphaning the root core. Mirror handleRestart: run cleanup under a
-    // generous deadline, each step isolated, then always exit.
+    // Bound cleanup so an unresponsive core cannot prevent the app from exiting.
     try {
       await Future.any([
         Future(() async {
           try {
             await savePreferences();
-          } catch (_) {}
-          try {
-            await system.setMacOSDns(true);
           } catch (_) {}
           try {
             await proxy?.stopProxy();
@@ -1043,10 +1033,7 @@ class AppController {
   Future<void> handleRestart() async {
     commonPrint.log("Starting application restart...");
 
-    // Stop the current core BEFORE relaunching so the new instance can connect
-    // cleanly: a core that survives the restart (notably the Windows helper-started
-    // process) keeps the socket/binary busy and blocks the fresh core from binding
-    // or replacing the updated .exe. Guarded by a timeout so the restart can't hang.
+    // Stop the current core before relaunching so the new instance can bind IPC.
     await Future.any([
       Future(() async {
         try {
@@ -1062,7 +1049,7 @@ class AppController {
       Future.delayed(const Duration(seconds: 3)),
     ]);
 
-    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+    if (Platform.isLinux) {
       final executablePath = Platform.resolvedExecutable;
       commonPrint.log("Launching new process: $executablePath");
 
@@ -1286,12 +1273,10 @@ class AppController {
         const Duration(seconds: 1), _updateCurrentProfileSubscription);
     autoUpdateProfiles();
     autoCheckUpdate();
-    if (!Platform.isMacOS) {
-      if (!_ref.read(appSettingProvider).silentLaunch) {
-        window?.show();
-      } else {
-        window?.hide();
-      }
+    if (!_ref.read(appSettingProvider).silentLaunch) {
+      window?.show();
+    } else {
+      window?.hide();
     }
     await _handlePreference();
     await _handlerDisclaimer();
@@ -1334,7 +1319,6 @@ class AppController {
     final known = await globalState.updateStartTime();
     if (!known) return;
     final running = globalState.isStart;
-    await StatusBarManager.updateIcon(isConnected: running);
     if (running) {
       globalState.startUpdateTasks();
       startRunTimeTimer();
@@ -1790,8 +1774,6 @@ class AppController {
   }
 
   Future<void> updateVisible() async {
-    if (Platform.isMacOS) return;
-
     final visible = await window?.isVisible;
     if (visible != null && !visible) {
       window?.show();

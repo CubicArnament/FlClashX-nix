@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/providers/config.dart';
 import 'package:flclashx/views/config/network.dart';
@@ -23,7 +21,6 @@ class TUNButton extends StatelessWidget {
                   generateSection(
                     items: [
                       if (system.isDesktop) const TUNItem(),
-                      if (Platform.isMacOS) const AutoSetSystemDnsItem(),
                       const TunStackItem(),
                     ],
                   ),

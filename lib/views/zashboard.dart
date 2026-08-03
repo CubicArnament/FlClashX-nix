@@ -4,41 +4,8 @@ import 'package:flclashx/common/common.dart';
 import 'package:flclashx/state.dart';
 import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
-/// macOS runs entirely from the tray popover, where a Flutter webview (a
-/// platform view) mis-maps pointer input and lands every click offset. So on
-/// macOS zashboard opens in a native WKWebView inside a standalone NSWindow (see
-/// ZashboardWindowController.swift) — no platform view, no offset, and real
-/// space for the dashboard. This channel drives that window.
-const _zashboardWindowChannel = MethodChannel('zashboard_window');
-bool _zashboardWindowHandlerReady = false;
-bool _zashboardDisableControllerOnClose = false;
-
-void _ensureZashboardWindowHandler() {
-  if (_zashboardWindowHandlerReady) return;
-  _zashboardWindowHandlerReady = true;
-  _zashboardWindowChannel.setMethodCallHandler((call) async {
-    // The native window tells us when it closes so we can undo the temporary
-    // external-controller enable (mirrors ZashboardWebViewPage.dispose).
-    if (call.method == 'onClosed' && _zashboardDisableControllerOnClose) {
-      _zashboardDisableControllerOnClose = false;
-      await globalState.appController.setExternalControllerEnabled(false);
-    }
-    return null;
-  });
-}
-
-Future<void> _openZashboardWindow(
-  String url, {
-  required bool disableControllerOnClose,
-}) async {
-  _ensureZashboardWindowHandler();
-  _zashboardDisableControllerOnClose = disableControllerOnClose;
-  await _zashboardWindowChannel.invokeMethod('open', {'url': url});
-}
 
 /// Opens zashboard pointed at this client's external-controller: in the built-in
 /// webview when [inApp] is set and the platform has a webview implementation,
@@ -53,12 +20,9 @@ Future<void> openZashboard(BuildContext context, {required bool inApp}) async {
   // is a plain-http URL on the loopback controller (see buildZashboardUrl). The
   // public fallback is https.
   final isLocalPanel = globalState.effectiveExternalUi.value.trim().isNotEmpty;
-  // In-app webview on Android/iOS, and on macOS for the local http panel.
-  // Windows/Linux have no webview_flutter, so they open it in the external
+  // In-app webview on Android. Linux opens it in the external
   // browser (the loopback-http URL works there too).
-  final canWebView = Platform.isAndroid ||
-      Platform.isIOS ||
-      (Platform.isMacOS && isLocalPanel);
+  final canWebView = Platform.isAndroid;
   final useWebView = inApp && canWebView;
   final controllerWasOff =
       globalState.effectiveExternalController.value.trim().isEmpty;
@@ -107,16 +71,7 @@ Future<void> openZashboard(BuildContext context, {required bool inApp}) async {
     return;
   }
 
-  if (useWebView && Platform.isMacOS) {
-    try {
-      await _openZashboardWindow(url, disableControllerOnClose: manageController);
-      return;
-    } catch (_) {
-      // Native window unavailable — fall through to the external browser and
-      // leave the controller as-is (browser close is undetectable anyway).
-      _zashboardDisableControllerOnClose = false;
-    }
-  } else if (useWebView) {
+  if (useWebView) {
     await BaseNavigator.push(
       context,
       ZashboardWebViewPage(
@@ -157,13 +112,7 @@ class _ZashboardWebViewPageState extends State<ZashboardWebViewPage> {
     super.initState();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted);
-    // A transparent background avoids a white flash in dark theme while the page
-    // paints, but on macOS the WKWebView is an NSView with no real
-    // background/opaque support — the shim renders the whole page white. Only
-    // apply it where it actually works (Android/iOS); macOS keeps the default.
-    if (!Platform.isMacOS) {
-      _controller.setBackgroundColor(const Color(0x00000000));
-    }
+    _controller.setBackgroundColor(const Color(0x00000000));
     _controller.setNavigationDelegate(
       NavigationDelegate(
         onProgress: (progress) => _progress.value = progress,
@@ -210,9 +159,8 @@ class _ZashboardWebViewPageState extends State<ZashboardWebViewPage> {
 
   @override
   Widget build(BuildContext context) => CommonScaffold(
-        // Android/iOS only — macOS opens zashboard in a native WKWebView window
-        // instead (see openZashboard), so this route never renders there. No
-        // PopScope: the app-bar back arrow just pops the route, so "back" always
+        // Android only. No PopScope: the app-bar back arrow pops the route,
+        // so "back" always
         // closes the panel (we never walk the webview history).
         title: 'zashboard',
         actions: [

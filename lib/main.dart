@@ -17,20 +17,11 @@ import 'clash/lib.dart';
 import 'common/common.dart';
 import 'models/core.dart' as core_models show Action;
 import 'models/models.dart';
-import 'pages/editor_window.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // desktop_multi_window re-launches this binary for each sub-window with
-  // ['multi_window', <id>, <jsonArgs>]. On macOS we use one for the roomy
-  // config editor — boot only it, none of the normal app (core/state/UI).
-  if (args.isNotEmpty && args.first == 'multi_window') {
-    await runEditorSubWindow(args);
-    return;
-  }
-
-  if (Platform.isWindows || Platform.isLinux) {
+  if (Platform.isLinux) {
     DartPluginRegistrant.ensureInitialized();
   }
 

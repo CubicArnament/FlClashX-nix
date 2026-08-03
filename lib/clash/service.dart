@@ -39,8 +39,7 @@ class ClashService extends ClashHandlerInterface {
   // handleRestart/handleExit). The socket EOF that a deliberate stop produces
   // must NOT be mistaken for a core crash — otherwise the recovery path fires a
   // restart that races the app restart and leaves the core offline / the UI
-  // wedged. On Windows the helper kills the core before we cancel the socket
-  // subscription, so this window is real.
+  // wedged.
   bool _stopping = false;
 
   /// Set by AppController to a guarded restartCore(). A crashed desktop core is a
@@ -51,15 +50,10 @@ class ClashService extends ClashHandlerInterface {
 
   Future<void> _initServer() async {
     runZonedGuarded(() async {
-      final address = !Platform.isWindows
-          ? InternetAddress(
-              unixSocketPath,
-              type: InternetAddressType.unix,
-            )
-          : InternetAddress(
-              localhost,
-              type: InternetAddressType.IPv4,
-            );
+      final address = InternetAddress(
+        unixSocketPath,
+        type: InternetAddressType.unix,
+      );
       await _deleteSocketFile();
       final server = await ServerSocket.bind(
         address,
@@ -120,8 +114,7 @@ class ClashService extends ClashHandlerInterface {
         await shutdown();
       }
       // Swap in a downloaded core update before anything spawns the binary — a
-      // spawn-first order either locks the exe (Windows) or leaves the whole
-      // session on the old core (macOS/Linux).
+      // spawn-first order leaves the whole session on the old core.
       await coreUpdater.applyPending();
       // Reset AFTER shutdown(): shutdown -> _destroySocket flushes/closes the
       // live socket via its `socketCompleter.isCompleted` guard, which a fresh
@@ -134,15 +127,7 @@ class ClashService extends ClashHandlerInterface {
         commonPrint.log('reStart aborted: server unavailable: $e');
         return;
       }
-      final arg = Platform.isWindows
-          ? "${serverSocket.port}"
-          : serverSocket.address.address;
-      if (Platform.isWindows && await system.checkIsAdmin()) {
-        final isSuccess = await request.startCoreByHelper(arg);
-        if (isSuccess) {
-          return;
-        }
-      }
+      final arg = serverSocket.address.address;
 
       final homeDirPath = await appPath.homeDirPath;
       final environment = Map<String, String>.from(Platform.environment);
@@ -203,8 +188,6 @@ class ClashService extends ClashHandlerInterface {
   /// Watches a spawned core process; an exit while it is still the current
   /// process is an unexpected crash. Intentional shutdown()/reStart() nulls or
   /// replaces `process` before the kill, so those exits are ignored here. The
-  /// Windows helper-started core has no local `process`, so the socket onDone
-  /// path covers that case.
   void _watchProcess(Process p) {
     p.exitCode.then((code) {
       if (!identical(p, process)) return;
@@ -279,11 +262,9 @@ class ClashService extends ClashHandlerInterface {
   }
 
   Future<void> _deleteSocketFile() async {
-    if (!Platform.isWindows) {
-      final file = File(unixSocketPath);
-      if (await file.exists()) {
-        await file.delete();
-      }
+    final file = File(unixSocketPath);
+    if (await file.exists()) {
+      await file.delete();
     }
   }
 
@@ -314,13 +295,9 @@ class ClashService extends ClashHandlerInterface {
   @override
   Future<bool> shutdown() async {
     // Guard the whole teardown: the EOF from killing the core (helper stop on
-    // Windows arrives before we cancel the subscription below) must not trip the
-    // crash-recovery path into a restart that races an intentional stop/restart.
+    // crash-recovery path must not race an intentional stop/restart.
     _stopping = true;
     try {
-      if (Platform.isWindows) {
-        await request.stopCoreByHelper();
-      }
       await _stdoutSubscription?.cancel();
       _stdoutSubscription = null;
       await _stderrSubscription?.cancel();

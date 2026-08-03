@@ -1118,7 +1118,7 @@ class _AnnounceBanner extends StatelessWidget {
         color: colorScheme.secondaryContainer,
       ),
       // EmojiText (not Text): renders flag/emoji runs with the Twemoji font so
-      // they show up — plain Text drops country flags entirely on Windows.
+      // they show up consistently across Flutter renderers.
       child: EmojiText(
         text,
         style: context.textTheme.bodyMedium?.copyWith(

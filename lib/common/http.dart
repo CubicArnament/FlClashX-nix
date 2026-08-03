@@ -22,7 +22,7 @@ class FlClashHttpOverrides extends HttpOverrides {
     //
     // On Android the service is always a VpnService (TUN), so when it's
     // running the traffic is already captured. `realTunEnable` is a desktop-
-    // only flag (it tracks admin authorization for TUN on Win/macOS/Linux)
+    // only flag (it tracks admin authorization for TUN on Linux)
     // and stays false on Android even though TUN is effectively on.
     final tunHandlesTraffic =
         Platform.isAndroid || globalState.appState.realTunEnable;

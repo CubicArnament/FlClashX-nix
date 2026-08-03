@@ -438,7 +438,6 @@ final networkItems = [
     items: [
       const OverrideNetworkSettingsItemNetwork(),
       if (system.isDesktop) const TUNItem(),
-      if (Platform.isMacOS) const AutoSetSystemDnsItem(),
       const TunStackItem(),
       if (!system.isDesktop) ...[
         const RouteModeItem(),

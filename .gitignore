@@ -1,19 +1,13 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-
 # Miscellaneous
 *.class
 *.log
 *.pyc
 *.swp
-.DS_Store
 .atom/
 .build/
 .buildlog/
 .history
 .svn/
-.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -29,7 +23,6 @@ migrate_working_dir/
 
 # Flutter/Dart/Pub related
 **/doc/api/
-**/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -59,10 +52,9 @@ android/local.properties
 store/
 docs/
 
-# Helper
-/services/helper/target/
 #libclash
 /libclash/
+result
 
 #jniLibs
 /android/app/src/main/jniLibs/

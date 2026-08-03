@@ -321,18 +321,8 @@ class _ModalSideSheet<T> extends StatefulWidget {
 class _ModalSideSheetState<T> extends State<_ModalSideSheet<T>> {
   ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
-  String _getRouteLabel(MaterialLocalizations localizations) {
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return '';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return localizations.dialogLabel;
-    }
-  }
+  String _getRouteLabel(MaterialLocalizations localizations) =>
+      localizations.dialogLabel;
 
   EdgeInsets _getNewClipDetails(Size topLayerSize) => EdgeInsets.fromLTRB(0, 0, 0, topLayerSize.height);
 

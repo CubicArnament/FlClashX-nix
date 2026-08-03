@@ -481,13 +481,7 @@ class _CoreUpdateItemState extends State<_CoreUpdateItem> {
             Platform.version.contains('aarch64')
         ? 'arm64'
         : 'amd64';
-    final platform = Platform.isWindows
-        ? 'windows'
-        : Platform.isMacOS
-            ? 'macos'
-            : 'linux';
-    final ext = Platform.isWindows ? '.exe' : '';
-    return 'FlClashCore-$platform-$arch$ext';
+    return 'FlClashCore-linux-$arch';
   }
 
   @override
@@ -567,7 +561,7 @@ class _CoreUpdateItemState extends State<_CoreUpdateItem> {
           TextButton(
             onPressed: () {
               // Restart only the core, not the whole app. reStart applies the
-              // pending binary (helper swap on Windows) and re-inits in place, so
+              // pending binary and re-inits in place, so
               // the Dart run-state stays in sync — a full app restart
               // (handleRestart) left the UI thinking the core was stopped while it
               // was actually up and proxying.

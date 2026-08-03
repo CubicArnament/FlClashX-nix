@@ -26,12 +26,7 @@ class OpenLogsFolderItem extends ConsumerWidget {
         await logsDir.create(recursive: true);
       }
       
-      // Open the folder based on platform
-      if (Platform.isWindows) {
-        await Process.run('explorer', [logsPath]);
-      } else if (Platform.isMacOS) {
-        await Process.run('open', [logsPath]);
-      } else if (Platform.isLinux) {
+      if (Platform.isLinux) {
         await Process.run('xdg-open', [logsPath]);
       }
     } catch (e) {
@@ -587,9 +582,9 @@ class ApplicationSettingView extends StatelessWidget {
       OpenLogsItem(),
       CloseConnectionsItem(),
       AutoCheckUpdateItem(),
-      // The in-app webview exists only on Android/iOS/macOS (webview_flutter);
+      // The in-app webview exists only on Android (webview_flutter);
       // hide the toggle where it could never take effect.
-      if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS)
+      if (Platform.isAndroid)
         ZashboardInAppItem(),
       if (system.isDesktop) ...[
         Padding(

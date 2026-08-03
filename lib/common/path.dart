@@ -36,31 +36,14 @@ class AppPath {
   Completer<Directory> tempDir = Completer();
   late String appDirPath;
 
-  String get executableExtension => Platform.isWindows ? ".exe" : "";
-
   String get executableDirPath {
     final currentExecutablePath = Platform.resolvedExecutable;
     return dirname(currentExecutablePath);
   }
 
-  String get corePath {
-    if (Platform.isMacOS) {
-      // Core is stored in Application Support/com.follow.clash/cores/ (copied by Swift code on launch)
-      // Permissions are set automatically in Swift
-      final home = Platform.environment['HOME'] ?? '';
-      return '$home/Library/Application Support/com.follow.clash/cores/FlClashCore';
-    }
-    return join(executableDirPath, "FlClashCore$executableExtension");
-  }
+  String get corePath => join(executableDirPath, "FlClashCore");
 
   String get corePendingPath => '$corePath.pending';
-
-  /// Allow-list consumed by the Windows helper service; lives next to the
-  /// helper exe so per-machine installs keep it admin-writable only.
-  String get allowedCoreHashPath =>
-      join(executableDirPath, "allowed_core.sha256");
-
-  String get helperPath => join(executableDirPath, "$appHelperService$executableExtension");
 
   Future<String> get downloadDirPath async {
     final directory = await downloadDir.future;

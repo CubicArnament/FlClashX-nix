@@ -5,23 +5,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProxyManager extends ConsumerStatefulWidget {
-
   const ProxyManager({super.key, required this.child});
+
   final Widget child;
 
   @override
-  ConsumerState createState() => _ProxyManagerState();
+  ConsumerState<ProxyManager> createState() => _ProxyManagerState();
 }
 
 class _ProxyManagerState extends ConsumerState<ProxyManager> {
-  Future<void> _updateProxy(ProxyState proxyState) async {
-    final isStart = proxyState.isStart;
-    final systemProxy = proxyState.systemProxy;
-    final port = proxyState.port;
-    if (isStart && systemProxy) {
-      proxy?.startProxy(port, proxyState.bassDomain);
+  Future<void> _updateProxy(ProxyState state) async {
+    if (state.isStart && state.systemProxy) {
+      await proxy?.startProxy(state.port, state.bassDomain);
     } else {
-      proxy?.stopProxy();
+      await proxy?.stopProxy();
     }
   }
 
@@ -30,10 +27,8 @@ class _ProxyManagerState extends ConsumerState<ProxyManager> {
     super.initState();
     ref.listenManual(
       proxyStateProvider,
-      (prev, next) {
-        if (prev != next) {
-          _updateProxy(next);
-        }
+      (previous, next) {
+        if (previous != next) _updateProxy(next);
       },
       fireImmediately: true,
     );

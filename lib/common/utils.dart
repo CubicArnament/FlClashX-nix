@@ -155,10 +155,6 @@ class Utils {
     bool isRunning = false,
     bool? isSystemDark,
   }) {
-    if (Platform.isMacOS) {
-      return "assets/images/icon_white.png";
-    }
-
     if (isRunning) {
       return "assets/images/icon.ico";
     }
@@ -336,11 +332,9 @@ class Utils {
   }
 
   SingleActivator controlSingleActivator(LogicalKeyboardKey trigger) {
-    final control = Platform.isMacOS ? false : true;
     return SingleActivator(
       trigger,
-      control: control,
-      meta: !control,
+      control: true,
     );
   }
 

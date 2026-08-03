@@ -204,41 +204,38 @@ class CommonNavigationBar extends ConsumerWidget {
         child: Column(
           children: [
             // App logo at the top of sidebar
-            if (!Platform.isMacOS) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      width: 36,
-                      height: 36,
-                      child: CircleAvatar(
-                        foregroundImage: AssetImage("assets/images/icon.png"),
-                        backgroundColor: Colors.transparent,
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: CircleAvatar(
+                      foregroundImage: AssetImage("assets/images/icon.png"),
+                      backgroundColor: Colors.transparent,
+                    ),
+                  ),
+                  if (showLabel) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      appName,
+                      style: context.textTheme.labelSmall?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    if (showLabel) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        appName,
-                        style: context.textTheme.labelSmall?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
                   ],
-                ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Divider(
-                height: 1,
-                indent: 12,
-                endIndent: 12,
-                color:
-                    context.colorScheme.outlineVariant.withValues(alpha: 0.5),
-              ),
-            ],
+            ),
+            const SizedBox(height: 8),
+            Divider(
+              height: 1,
+              indent: 12,
+              endIndent: 12,
+              color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
             Expanded(
               child: ScrollConfiguration(
                 behavior: HiddenBarScrollBehavior(),

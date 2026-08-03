@@ -154,8 +154,6 @@ class ConnectionRow extends StatelessWidget {
     Future<ImageProvider?>? future;
     if (Platform.isAndroid && process.isNotEmpty) {
       future = _packageIconFuture(process);
-    } else if (Platform.isWindows) {
-      future = windowsProcessIcon(connection.id);
     } else if (Platform.isLinux) {
       future = linuxProcessIcon(connection.id, process);
     }

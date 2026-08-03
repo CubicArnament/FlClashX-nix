@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:uni_platform/uni_platform.dart';
 
@@ -82,11 +80,11 @@ final Map<PhysicalKeyboardKey, String> _knownKeyLabels =
   PhysicalKeyboardKey.controlLeft: "CTRL",
   PhysicalKeyboardKey.shiftLeft: 'SHIFT',
   PhysicalKeyboardKey.altLeft: "ALT",
-  PhysicalKeyboardKey.metaLeft: Platform.isMacOS ? '⌘' : 'WIN',
+  PhysicalKeyboardKey.metaLeft: 'META',
   PhysicalKeyboardKey.controlRight: "CTRL",
   PhysicalKeyboardKey.shiftRight: 'SHIFT',
   PhysicalKeyboardKey.altRight: "ALT",
-  PhysicalKeyboardKey.metaRight: Platform.isMacOS ? '⌘' : 'WIN',
+  PhysicalKeyboardKey.metaRight: 'META',
   PhysicalKeyboardKey.fn: 'FN',
 };
 

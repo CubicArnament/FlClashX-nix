@@ -18,7 +18,6 @@ import 'package:flclashx/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart' show dirname, join;
 import 'package:re_editor/re_editor.dart';
 import 'package:re_highlight/languages/yaml.dart';
 import 'package:re_highlight/styles/atom-one-dark.dart';
@@ -79,7 +78,6 @@ class _ToolboxViewState extends ConsumerState<ToolsView> {
         const _ThemeItem(),
         const _BackupItem(),
         if (system.isDesktop) const _HotkeyItem(),
-        if (Platform.isWindows) const _LoopbackItem(),
         if (Platform.isAndroid) const _AccessItem(),
         const _ConfigItem(),
         const _SettingItem(),
@@ -204,26 +202,6 @@ class _HotkeyItem extends StatelessWidget {
         title: appLocale.hotkeyManagement,
         widget: const HotKeyView(),
       ),
-    );
-  }
-}
-
-class _LoopbackItem extends StatelessWidget {
-  const _LoopbackItem();
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocale = AppLocalizations.of(context);
-    return ListItem(
-      leading: const Icon(Icons.lock),
-      title: Text(appLocale.loopback),
-      subtitle: Text(appLocale.loopbackDesc),
-      onTap: () {
-        windows?.runas(
-          '"${join(dirname(Platform.resolvedExecutable), "EnableLoopback.exe")}"',
-          "",
-        );
-      },
     );
   }
 }

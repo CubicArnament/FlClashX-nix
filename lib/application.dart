@@ -33,9 +33,7 @@ class ApplicationState extends ConsumerState<Application> {
   final _pageTransitionsTheme = const PageTransitionsTheme(
     builders: <TargetPlatform, PageTransitionsBuilder>{
       TargetPlatform.android: CommonPageTransitionsBuilder(),
-      TargetPlatform.windows: CommonPageTransitionsBuilder(),
       TargetPlatform.linux: CommonPageTransitionsBuilder(),
-      TargetPlatform.macOS: CommonPageTransitionsBuilder(),
     },
   );
 
@@ -48,10 +46,6 @@ class ApplicationState extends ConsumerState<Application> {
   @override
   void initState() {
     super.initState();
-
-    if (Platform.isWindows) {
-      windows?.enableDarkModeForApp();
-    }
 
     if (Platform.isAndroid) {
       // Pin the highest refresh rate (per session) so the Flutter engine samples
@@ -162,18 +156,6 @@ class ApplicationState extends ConsumerState<Application> {
                       _buildApp(child!),
                     ),
                   );
-
-                  if (Platform.isMacOS) {
-                    return FittedBox(
-                      fit: BoxFit.contain,
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        width: 500,
-                        height: 800,
-                        child: app,
-                      ),
-                    );
-                  }
 
                   return app;
                 },

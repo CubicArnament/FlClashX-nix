@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=FlClashX
+Comment=Proxy client based on Mihomo
+Exec=FlClashX
+Icon=flclashx
+Terminal=false
+Categories=Network;
+Keywords=FlClashX;Clash;Proxy;
+StartupNotify=true

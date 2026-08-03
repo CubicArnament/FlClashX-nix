@@ -6,7 +6,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flclashx/common/common.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:win32_registry/win32_registry.dart';
 
 class DeviceDetails {
   DeviceDetails({
@@ -53,34 +52,9 @@ class DeviceInfoService {
     }
   }
 
-  Future<String?> _getWindowsMachineGuid() async {
-    try {
-      const keyPath = r'SOFTWARE\Microsoft\Cryptography';
-      const valueName = 'MachineGuid';
-
-      final key = Registry.openPath(RegistryHive.localMachine, path: keyPath);
-      final data = key.getValue(valueName);
-      key.close();
-
-      return data?.toString();
-    } catch (e) {
-      return null;
-    }
-  }
-
   Future<String?> _getPlatformDeviceId() async {
     try {
-      if (Platform.isWindows) {
-        final machineGuid = await _getWindowsMachineGuid();
-        if (machineGuid != null && machineGuid.isNotEmpty) {
-          return machineGuid;
-        }
-
-        final info = await _deviceInfoPlugin.windowsInfo;
-        final fallback =
-            '${info.computerName}-${info.deviceId}-${info.productId}';
-        return fallback;
-      } else if (Platform.isAndroid) {
+      if (Platform.isAndroid) {
         // Try to get ANDROID_ID first (unique per device, persists across app reinstalls)
         final androidId = await _getAndroidId();
         if (androidId != null && androidId.isNotEmpty) {
@@ -95,11 +69,6 @@ class DeviceInfoService {
       } else if (Platform.isLinux) {
         final info = await _deviceInfoPlugin.linuxInfo;
         final combined = info.machineId ?? '${info.id}-${info.name}';
-        return combined;
-      } else if (Platform.isMacOS) {
-        final info = await _deviceInfoPlugin.macOsInfo;
-        final combined =
-            info.systemGUID ?? '${info.model}-${info.computerName}';
         return combined;
       }
       return null;
@@ -139,12 +108,7 @@ class DeviceInfoService {
     try {
       hwid = await _resolveHwid();
 
-      if (Platform.isWindows) {
-        final info = await _deviceInfoPlugin.windowsInfo;
-        os = 'Windows';
-        osVersion = info.displayVersion;
-        model = info.productName;
-      } else if (Platform.isAndroid) {
+      if (Platform.isAndroid) {
         final info = await _deviceInfoPlugin.androidInfo;
         os = 'Android';
         osVersion = info.version.release;
@@ -154,11 +118,6 @@ class DeviceInfoService {
         os = 'Linux';
         osVersion = info.versionId;
         model = info.name;
-      } else if (Platform.isMacOS) {
-        final info = await _deviceInfoPlugin.macOsInfo;
-        os = 'macOS';
-        osVersion = info.osRelease;
-        model = info.model;
       }
     } catch (e) {
       // Silently handle errors in device info retrieval

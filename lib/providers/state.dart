@@ -156,7 +156,7 @@ ProxyState proxyState(Ref ref) {
   );
   // Mixed-port = 0 means the HTTP proxy inbound is disabled, so there's
   // nothing for the OS-level system proxy to point at. Force it off here so
-  // ProxyManager calls stopProxy() instead of startProxy(0, ...).
+  // The proxy manager disables the system proxy instead of applying port zero.
   final systemProxy = mixedPort == 0 ? false : vm2.a;
   return ProxyState(
     isStart: isStart,

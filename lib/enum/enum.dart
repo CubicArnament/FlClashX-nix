@@ -11,17 +11,11 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
 enum SupportPlatform {
-  Windows,
-  MacOS,
   Linux,
   Android;
 
   static SupportPlatform get currentPlatform {
-    if (Platform.isWindows) {
-      return SupportPlatform.Windows;
-    } else if (Platform.isMacOS) {
-      return SupportPlatform.MacOS;
-    } else if (Platform.isLinux) {
+    if (Platform.isLinux) {
       return SupportPlatform.Linux;
     } else if (Platform.isAndroid) {
       return SupportPlatform.Android;
@@ -32,8 +26,6 @@ enum SupportPlatform {
 
 const desktopPlatforms = [
   SupportPlatform.Linux,
-  SupportPlatform.MacOS,
-  SupportPlatform.Windows,
 ];
 
 enum GroupType {
@@ -292,12 +284,6 @@ enum ActionMethod {
 }
 
 enum AuthorizeCode { none, success, error }
-
-enum WindowsHelperServiceStatus {
-  none,
-  presence,
-  running,
-}
 
 enum FunctionTag {
   updateClashConfig,

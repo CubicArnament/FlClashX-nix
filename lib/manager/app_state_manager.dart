@@ -26,11 +26,6 @@ class AppStateManager extends ConsumerStatefulWidget {
 
 class _AppStateManagerState extends ConsumerState<AppStateManager>
     with WidgetsBindingObserver {
-  // Serializes macOS system-DNS set/restore so concurrent listener fires (rapid
-  // toggle / TUN flap) can't interleave networksetup calls and snapshot a transient
-  // injected value as the "origin".
-  Future<void> _dnsOp = Future.value();
-
   @override
   void initState() {
     super.initState();
@@ -66,20 +61,6 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
         globalState.appController.savePreferencesDebounce();
       }
     });
-    ref.listenManual(
-      autoSetSystemDnsStateProvider,
-      (prev, next) {
-        if (prev == next) {
-          return;
-        }
-        final restore = !(next.a == true && next.b == true);
-        // Chain through _dnsOp so set/restore never overlap; catchError keeps the
-        // chain alive if one networksetup invocation throws.
-        _dnsOp = _dnsOp
-            .then((_) => system.setMacOSDns(restore))
-            .catchError((_) {});
-      },
-    );
     ref.listenManual(
       patchClashConfigProvider.select((state) => state.mode),
       (prev, next) {
@@ -125,9 +106,6 @@ class _AppStateManagerState extends ConsumerState<AppStateManager>
 
   @override
   void dispose() {
-    // The real teardown DNS restore runs in controller.handleExit (bounded + awaited
-    // before shutdown); dispose() is not awaited by the framework, so doing async
-    // work here was unreliable and delayed observer teardown.
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

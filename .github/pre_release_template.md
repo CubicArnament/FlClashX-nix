@@ -27,27 +27,14 @@
             </td>
         </tr>
         <tr>
-            <td>Windows</td>
-            <td>
-                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-windows-amd64-setup.exe"><img src="https://img.shields.io/badge/Setup-x64-2d7d9a.svg?logo=windows"></a><br>
-                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-windows-arm-setup.exe"><img src="https://img.shields.io/badge/Setup-arm-2d7d9a.svg?logo=windows"></a><br>
-                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-windows-amd64.zip"><img src="https://img.shields.io/badge/Portable-x64-67b7d1.svg?logo=windows"></a><br>
-                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-windows-arm.zip"><img src="https://img.shields.io/badge/Portable-arm-67b7d1.svg?logo=windows"></a>
-            </td>
-        </tr>
-        <tr>
-            <td>macOS</td>
-            <td>
-                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-macos-arm64.dmg"><img src="https://img.shields.io/badge/DMG-Apple%20Silicon-%23000000.svg?logo=apple"></a><br>
-                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-macos-amd64.dmg"><img src="https://img.shields.io/badge/DMG-Intel%20X64-%2300A9E0.svg?logo=apple"></a><br>
-            </td>
-        </tr>
-        <tr>
             <td>Linux</td>
             <td>
                 <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-linux-amd64.AppImage"><img src="https://img.shields.io/badge/AppImage-x64-f84e29.svg?logo=linux"></a><br>
+                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-linux-arm64.AppImage"><img src="https://img.shields.io/badge/AppImage-ARM64-f84e29.svg?logo=linux"></a><br>
                 <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-linux-amd64.deb"><img src="https://img.shields.io/badge/DebPackage-x64-FF9966.svg?logo=debian"></a><br>
+                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-linux-arm64.deb"><img src="https://img.shields.io/badge/DebPackage-ARM64-FF9966.svg?logo=debian"></a><br>
                 <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-linux-amd64.rpm"><img src="https://img.shields.io/badge/RpmPackage-x64-F1B42F.svg?logo=redhat"></a><br>
+                <a href="https://github.com/pluralplay/FlClashX/releases/download/vVERSION/FlClashX-linux-arm64.rpm"><img src="https://img.shields.io/badge/RpmPackage-ARM64-F1B42F.svg?logo=redhat"></a><br>
                 <a href="https://aur.archlinux.org/packages/flclashx-git"><img src="https://img.shields.io/aur/version/flclashx-git"></a>
             </td>
         </tr>

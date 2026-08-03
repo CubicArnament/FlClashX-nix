@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:flclashx/common/common.dart';
 import 'package:flclashx/enum/enum.dart';
 import 'package:flclashx/providers/config.dart';
@@ -8,7 +6,6 @@ import 'package:flclashx/providers/app.dart';
 import 'package:flclashx/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:window_ext/window_ext.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowManager extends ConsumerStatefulWidget {
@@ -24,7 +21,7 @@ class WindowManager extends ConsumerStatefulWidget {
 }
 
 class _WindowContainerState extends ConsumerState<WindowManager>
-    with WindowListener, WindowExtListener {
+    with WindowListener {
   @override
   Widget build(BuildContext context) => widget.child;
 
@@ -44,11 +41,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
         }
       },
     );
-    // On macOS, we still need windowExtManager for quit handling, but not windowManager
-    windowExtManager.addListener(this);
-    if (!Platform.isMacOS) {
-      windowManager.addListener(this);
-    }
+    windowManager.addListener(this);
   }
 
   @override
@@ -62,12 +55,6 @@ class _WindowContainerState extends ConsumerState<WindowManager>
     super.onWindowFocus();
     commonPrint.log("focus");
     render?.resume();
-  }
-
-  @override
-  Future<void> onShouldTerminate() async {
-    await globalState.appController.handleExit();
-    super.onShouldTerminate();
   }
 
   @override
@@ -111,10 +98,7 @@ class _WindowContainerState extends ConsumerState<WindowManager>
 
   @override
   Future<void> dispose() async {
-    windowExtManager.removeListener(this);
-    if (!Platform.isMacOS) {
-      windowManager.removeListener(this);
-    }
+    windowManager.removeListener(this);
     super.dispose();
   }
 }
@@ -129,10 +113,6 @@ class WindowHeaderContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isMacOS) {
-      return child;
-    }
-
     return Consumer(
       builder: (_, ref, child) => Stack(
           children: [
@@ -174,9 +154,7 @@ class _WindowHeaderState extends State<WindowHeader> {
   @override
   void initState() {
     super.initState();
-    if (!Platform.isMacOS) {
-      _initNotifier();
-    }
+    _initNotifier();
   }
 
   Future<void> _initNotifier() async {
@@ -210,7 +188,6 @@ class _WindowHeaderState extends State<WindowHeader> {
     isPinNotifier.value = await windowManager.isAlwaysOnTop();
   }
 
-  // Windows 11 style window control button
   Widget _buildWindowButton({
     required Widget icon,
     required VoidCallback onPressed,
@@ -327,19 +304,14 @@ class _WindowHeaderState extends State<WindowHeader> {
               ),
             ),
             // Content
-            if (Platform.isMacOS)
-              const Center(child: Text(appName))
-            else
-              Row(
-                children: [
-                  const SizedBox(width: 12),
-                  // Connection status indicator
-                  const _ConnectionStatusIndicator(),
-                  const Spacer(),
-                  // Window controls
-                  _buildActions(context),
-                ],
-              ),
+            Row(
+              children: [
+                const SizedBox(width: 12),
+                const _ConnectionStatusIndicator(),
+                const Spacer(),
+                _buildActions(context),
+              ],
+            ),
           ],
         ),
       ),
@@ -347,7 +319,6 @@ class _WindowHeaderState extends State<WindowHeader> {
   }
 }
 
-// Windows 11 style control button with hover effect
 class _WindowControlButton extends StatefulWidget {
   final Widget icon;
   final VoidCallback onPressed;

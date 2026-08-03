@@ -20,8 +20,7 @@ class Tray {
     required bool isRunning,
     bool force = false,
   }) async {
-    if (Platform.isAndroid || Platform.isMacOS) {
-      // Skip tray on Android and macOS (macOS uses native status bar)
+    if (Platform.isAndroid) {
       return;
     }
     if (Platform.isLinux || force) {
@@ -32,31 +31,18 @@ class Tray {
         brightness: brightness ??
             WidgetsBinding.instance.platformDispatcher.platformBrightness,
         isRunning: isRunning,
-        isSystemDark: Platform.isWindows ? system.isWindowsSystemDark : null,
+        isSystemDark: null,
       ),
       isTemplate: true,
     );
-    if (!Platform.isLinux) {
-      await trayManager.setToolTip(
-        appName,
-      );
-    }
   }
 
   Future<void> update({
     required TrayState trayState,
     bool focus = false,
   }) async {
-    if (Platform.isAndroid || Platform.isMacOS) {
-      // Skip tray on Android and macOS (macOS uses native status bar)
+    if (Platform.isAndroid) {
       return;
-    }
-    if (!Platform.isLinux) {
-      await _updateSystemTray(
-        brightness: trayState.brightness,
-        isRunning: trayState.isStart,
-        force: focus,
-      );
     }
     final menuItems = <MenuItem>[];
     final showMenuItem = MenuItem(
@@ -157,9 +143,7 @@ class Tray {
   Future<void> _copyEnv(int port) async {
     final url = "http://127.0.0.1:$port";
 
-    final cmdline = Platform.isWindows
-        ? "set \$env:all_proxy=$url"
-        : "export all_proxy=$url";
+    final cmdline = "export all_proxy=$url";
 
     await Clipboard.setData(
       ClipboardData(
