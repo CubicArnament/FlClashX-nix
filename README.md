@@ -1,6 +1,6 @@
 <div>
 
-[**English**](README_EN.md)
+[**English**](README_EN.md) | [**Қазақша**](README_KK.md)
 
 </div>
 
@@ -387,14 +387,11 @@ proxy-groups:
 
 ## Использование
 
-### Linux
+### Linux и NixOS
 
-⚠️ Перед использованием убедитесь, что установлены следующие зависимости:
-
-```bash
- sudo apt-get install libayatana-appindicator3-dev
- sudo apt-get install libkeybinder-3.0-dev
-```
+Поддерживаются только Linux desktop и Android. Nix Flake закрепляет Flutter,
+Go, Android SDK/NDK и Gradle. Подробные команды сборки, обновления lock-файлов
+и подключения NixOS-модуля описаны в [COMMANDS.md](COMMANDS.md).
 
 ### Android
 

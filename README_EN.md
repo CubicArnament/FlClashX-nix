@@ -1,6 +1,6 @@
 <div>
 
-[**Russian**](README.md)
+[**Russian**](README.md) | [**Қазақша**](README_KK.md)
 
 </div>
 
@@ -306,14 +306,11 @@ By default, the following configuration parameters received from the subscriptio
 
 ## Application Usage
 
-### Linux
+### Linux and NixOS
 
-⚠️ Before use, ensure the following dependencies are installed:
-
-```bash
- sudo apt-get install libayatana-appindicator3-dev
- sudo apt-get install libkeybinder-3.0-dev
-```
+Only Linux desktop and Android are supported. The Nix flake pins Flutter, Go,
+the Android SDK/NDK, and Gradle. See [COMMANDS.md](COMMANDS.md) for builds,
+lock-file updates, and NixOS module configuration.
 
 ### Android
 
