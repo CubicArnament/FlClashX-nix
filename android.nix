@@ -95,8 +95,14 @@ let
       data = ./gradle-deps.json;
     };
 
-    gradleUpdateTask = ":app:dependencies";
-    gradleFlags = [ "-p android" ];
+    # nixpkgs injects this task through its Gradle init script. Unlike a
+    # display-only `dependencies` invocation, it resolves every configuration
+    # so mitm-cache can record the complete Maven graph.
+    gradleUpdateTask = "nixDownloadDeps";
+    # gradle.fetchDeps invokes its update task directly, before buildPhase.
+    # Enter the Android Gradle project here so it resolves real configurations
+    # rather than creating an empty build at the Flutter repository root.
+    preGradleUpdate = "cd android";
 
     ANDROID_HOME = androidHome;
     ANDROID_SDK_ROOT = androidHome;
@@ -107,6 +113,9 @@ let
     configurePhase = ''
       runHook preConfigure
 
+      # Gradle's copyNativeLibs task deletes and recreates this directory.
+      # The source tree is read-only in the dependency update sandbox, so make
+      # the staged Go artifacts writable before Gradle configures the project.
       export HOME=$TMPDIR/home
       mkdir -p $HOME
       cat > android/local.properties <<EOF
@@ -117,6 +126,7 @@ let
 
       mkdir -p libclash
       cp -r ${androidCore}/android libclash/android
+      chmod -R u+w libclash/android
 
       runHook postConfigure
     '';
@@ -124,16 +134,12 @@ let
     buildPhase = ''
       runHook preBuild
 
-      if [ "''${gradleUpdateMode-}" = 1 ]; then
-        gradle -p android :app:dependencies --no-daemon
-      else
-        flutter build apk \
-          --release \
-          --no-pub \
-          --dart-define=APP_ENV=stable \
-          --dart-define=CORE_VERSION=v1.19.28 \
-          --dart-define=APP_VERSION=0.4.2
-      fi
+      flutter build apk \
+        --release \
+        --no-pub \
+        --dart-define=APP_ENV=stable \
+        --dart-define=CORE_VERSION=v1.19.28 \
+        --dart-define=APP_VERSION=0.4.2
 
       runHook postBuild
     '';

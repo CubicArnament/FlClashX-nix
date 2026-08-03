@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   sync:
@@ -17,26 +16,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Merge upstream
+      - name: Merge and prune upstream
         run: |
+          git config user.name "flclashx-nix bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/pluralplay/FlClashX.git
           git fetch upstream main
+          before=$(git rev-parse HEAD)
           git merge --no-edit upstream/main
 
-      # The upstream project targets additional platforms. This removes their
-      # native trees before proposing the sync; Dart/platform API changes remain
-      # visible in the PR and are checked by nix-ci before merge.
-      - name: Remove unsupported native platforms
-        run: |
-          git rm -r --ignore-unmatch windows macos ios services/helper plugins/proxy plugins/window_ext
+          # This fork intentionally supports Linux and Android only.
+          git rm -r --ignore-unmatch \
+            windows macos ios services/helper plugins/proxy plugins/window_ext
 
-      - uses: peter-evans/create-pull-request@v7
-        with:
-          branch: automation/sync-upstream
-          delete-branch: true
-          title: "sync: pluralplay/FlClashX"
-          commit-message: "sync: pluralplay/FlClashX"
-          body: |
-            Syncs `upstream/main` and removes upstream native trees unsupported by this fork.
+          if [ "$before" = "$(git rev-parse HEAD)" ]; then
+            exit 0
+          fi
 
-            Review Dart platform guards, `pubspec.lock`, and Nix input locks before merging.
+          git commit --amend --no-edit
+          git push origin HEAD:main
