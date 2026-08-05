@@ -58,4 +58,22 @@ runCommand "flclashx-dependency-attestation" { nativeBuildInputs = [ jq ]; } ''
   ${jq}/bin/jq --sort-keys . > $out/attestation.json <<'EOF'
   ${report}
   EOF
+  cat > $out/release-notes.md <<'EOF'
+  ${builtins.readFile ./.github/release_template.md}
+  EOF
+  {
+    printf '\n## Attested Inputs\n\n'
+    printf '| Input | Value |\n| --- | --- |\n'
+    ${jq}/bin/jq -r '
+      .nixpkgs | "| nixpkgs revision | `\(.rev)` |\n| nixpkgs NAR hash | `\(.narHash)` |"
+    ' $out/attestation.json
+    ${jq}/bin/jq -r '
+      .locks | to_entries[] | "| \(.key) lock SHA-256 | `\(.value)` |"
+    ' $out/attestation.json
+    ${jq}/bin/jq -r '
+      "| Gradle wrapper | `\(.gradleWrapper)` |\n| Locked Pub packages | \(.pubPackages) |"
+    ' $out/attestation.json
+    printf '\n### Locked Gradle Repositories\n\n'
+    ${jq}/bin/jq -r '.gradleRepositories[] | "- `\(.)`"' $out/attestation.json
+  } >> $out/release-notes.md
 ''

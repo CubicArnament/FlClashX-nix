@@ -43,4 +43,4 @@ jobs:
           gh release create "$tag" attestation-result/attestation.json \
             --target "$GITHUB_SHA" \
             --title "Dependency attestation ${GITHUB_SHA::12}" \
-            --notes-file .github/release_template.md
+            --notes-file attestation-result/release-notes.md

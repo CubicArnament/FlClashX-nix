@@ -13,6 +13,9 @@ derivation after `nix flake check --no-build` passed. It records:
 - the Gradle wrapper distribution and locked Maven repositories;
 - the number of locked Pub packages.
 
+The attested values are rendered below for convenient review. Download
+`attestation.json` only when a machine-readable report is needed.
+
 ## Reproduce
 
 ```bash
