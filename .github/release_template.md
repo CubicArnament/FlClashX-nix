@@ -16,6 +16,20 @@ derivation after `nix flake check --no-build` passed. It records:
 The attested values are rendered below for convenient review. Download
 `attestation.json` only when a machine-readable report is needed.
 
+## NixOS System Test
+
+**Status: passed with headless-session warning**
+
+The attached `nixos-system-test.md` documents a successful headless NixOS VM
+smoke test for this commit. It exercises the packaged application in a clean
+non-FHS NixOS environment with software EGL, X11, and a private D-Bus session.
+
+Warning: this is a functional startup test, not a visual-rendering or
+end-to-end UI test.
+
+Warning: the minimal VM has no StatusNotifier watcher. Its expected optional
+tray-integration D-Bus warning is documented in `nixos-system-test.md`.
+
 ## Reproduce
 
 ```bash

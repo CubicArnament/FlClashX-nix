@@ -61,6 +61,7 @@ docs/
 /libclash/
 result
 attestation-result
+nixos-system-test.md
 
 #jniLibs
 /android/app/src/main/jniLibs/

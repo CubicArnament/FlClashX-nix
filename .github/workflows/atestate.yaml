@@ -23,11 +23,16 @@ jobs:
       - name: Generate dependency attestation
         run: nix build .#dependency-attestation --out-link attestation-result
 
+      - name: Run NixOS system smoke test
+        run: nix build .#nixos-system-test-report -L --out-link nixos-system-test.md
+
       - name: Upload dependency attestation
         uses: actions/upload-artifact@v4
         with:
           name: dependency-attestation-${{ github.sha }}
-          path: attestation-result/attestation.json
+          path: |
+            attestation-result/attestation.json
+            nixos-system-test.md
           retention-days: 7
 
       - name: Publish temporary attestation release
@@ -40,7 +45,7 @@ jobs:
             while IFS= read -r old_tag; do
               gh release delete "$old_tag" --yes --cleanup-tag
             done
-          gh release create "$tag" attestation-result/attestation.json \
+          gh release create "$tag" attestation-result/attestation.json nixos-system-test.md \
             --target "$GITHUB_SHA" \
             --title "Dependency attestation ${GITHUB_SHA::12}" \
             --notes-file attestation-result/release-notes.md

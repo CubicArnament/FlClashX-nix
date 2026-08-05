@@ -44,6 +44,13 @@
             inherit core flclashx;
             src = self;
           };
+          nixosVmTest = pkgs.callPackage ./nixos-vm-test.nix {
+            inherit flclashx;
+            flclashxModule = self.nixosModules.default;
+          };
+          nixosSystemReport = pkgs.callPackage ./nixos-system-report.nix {
+            inherit nixosVmTest;
+          };
         in
         {
           inherit flclashx core;
@@ -53,6 +60,8 @@
         // lib.optionalAttrs (system == "x86_64-linux") {
           android-apk = android;
           android-deps = android.mitmCache;
+          nixos-vm-test = nixosVmTest;
+          nixos-system-test-report = nixosSystemReport;
         }
       );
 
@@ -76,9 +85,15 @@
         }
       );
 
-      checks = forAllSystems (system: {
-        dependency-attestation = self.packages.${system}.dependency-attestation;
-      });
+      checks = forAllSystems (
+        system:
+        {
+          dependency-attestation = self.packages.${system}.dependency-attestation;
+        }
+        // lib.optionalAttrs (system == "x86_64-linux") {
+          nixos-vm-test = self.packages.${system}.nixos-vm-test;
+        }
+      );
 
       devShells = forAllSystems (
         system:

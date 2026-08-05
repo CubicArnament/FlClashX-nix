@@ -8,6 +8,7 @@
   makeWrapper,
   core,
   src,
+  xdg-utils,
 }:
 
 flutter341.buildFlutterApplication {
@@ -45,7 +46,12 @@ flutter341.buildFlutterApplication {
       $out/share/applications/com.follow.clashx.desktop
 
     wrapProgram $out/bin/FlClashX \
-      --prefix PATH : ${lib.makeBinPath [ core ]}
+      --prefix PATH : ${
+        lib.makeBinPath [
+          core
+          xdg-utils
+        ]
+      }
   '';
 
   meta = {
