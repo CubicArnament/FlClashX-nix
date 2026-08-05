@@ -36,7 +36,7 @@ let
       goModules = builtins.hashFile "sha256" ./core/go.sum;
     };
     pubPackages = builtins.length (builtins.attrNames pubLock.packages);
-    gradleRepositories = gradleRepositories;
+    inherit gradleRepositories;
     gradleWrapper = lib.findFirst (line: lib.hasPrefix "distributionUrl=" line) "" (
       lib.splitString "\n" wrapper
     );
