@@ -1,5 +1,6 @@
 {
   lib,
+  jq,
   runCommand,
 }:
 let
@@ -52,9 +53,9 @@ assert lib.all validPubPackage (builtins.attrValues pubLock.packages);
 assert lib.any (
   line: builtins.match "distributionUrl=.*gradle-[0-9.]+-(all|bin)[.]zip" line != null
 ) (lib.splitString "\n" wrapper);
-runCommand "flclashx-dependency-attestation" { } ''
+runCommand "flclashx-dependency-attestation" { nativeBuildInputs = [ jq ]; } ''
   mkdir -p $out
-  cat > $out/attestation.json <<'EOF'
+  ${jq}/bin/jq --sort-keys . > $out/attestation.json <<'EOF'
   ${report}
   EOF
 ''
