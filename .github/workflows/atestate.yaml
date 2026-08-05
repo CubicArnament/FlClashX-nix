@@ -1,0 +1,21 @@
+name: dependency-attestation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Verify dependency attestation
+        run: nix flake check --no-build

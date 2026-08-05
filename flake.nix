@@ -75,6 +75,13 @@
         }
       );
 
+      checks = forAllSystems (
+        system:
+        {
+          dependency-attestation = (pkgsFor system).callPackage ./attestation.nix { };
+        }
+      );
+
       devShells = forAllSystems (
         system:
         let
