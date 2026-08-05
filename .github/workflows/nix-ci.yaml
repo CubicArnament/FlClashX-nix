@@ -23,8 +23,8 @@ jobs:
 
       - name: Lint Nix
         run: |
-          nix run nixpkgs#deadnix -- --fail .
-          nix run nixpkgs#statix -- check .
+          nix run github:NixOS/nixpkgs/104240a772428cc2e20d8fd86c9ddbb886bbaff2#deadnix -- --fail .
+          nix run github:NixOS/nixpkgs/104240a772428cc2e20d8fd86c9ddbb886bbaff2#statix -- check .
 
       - name: Evaluate flake
         run: nix flake check --no-build
@@ -32,5 +32,5 @@ jobs:
       - name: Dry-run Linux package
         run: nix build .#flclashx --dry-run
 
-      - name: Dry-run Android package
-        run: nix build .#android-apk --dry-run
+      - name: Build Android package
+        run: nix build .#android-apk -L

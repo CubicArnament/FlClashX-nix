@@ -8,14 +8,19 @@
   gradle_8,
   git,
   cacert,
+  jq,
   core,
+  flclashx,
   src,
 }:
 
 let
   androidComposition = androidenv.composeAndroidPackages {
     platformVersions = [ "36" ];
-    buildToolsVersions = [ "36.0.0" ];
+    buildToolsVersions = [
+      "35.0.0"
+      "36.0.0"
+    ];
     abiVersions = [
       "armeabi-v7a"
       "arm64-v8a"
@@ -100,14 +105,23 @@ let
       data = ./gradle-deps.json;
     };
 
-    # nixpkgs injects this task through its Gradle init script. Unlike a
-    # display-only `dependencies` invocation, it resolves every configuration
-    # so mitm-cache can record the complete Maven graph.
-    gradleUpdateTask = "nixDownloadDeps";
-    # gradle.fetchDeps invokes its update task directly, before buildPhase.
-    # Enter the Android Gradle project here so it resolves real configurations
-    # rather than creating an empty build at the Flutter repository root.
-    preGradleUpdate = "cd android";
+    gradleUpdateScript = ''
+      runHook preBuild
+      export GRADLE_OPTS="''${GRADLE_OPTS:-} \
+        -Dhttp.proxyHost=$MITM_CACHE_HOST \
+        -Dhttp.proxyPort=$MITM_CACHE_PORT \
+        -Dhttps.proxyHost=$MITM_CACHE_HOST \
+        -Dhttps.proxyPort=$MITM_CACHE_PORT \
+        -Djavax.net.ssl.trustStore=$MITM_CACHE_KEYSTORE \
+        -Djavax.net.ssl.trustStorePassword=$MITM_CACHE_KS_PWD"
+      flutter build apk \
+        --release \
+        --no-pub \
+        --dart-define=APP_ENV=stable \
+        --dart-define=CORE_VERSION=v1.19.28 \
+        --dart-define=APP_VERSION=0.4.2
+      runHook postBuild
+    '';
 
     ANDROID_HOME = androidHome;
     ANDROID_SDK_ROOT = androidHome;
@@ -118,9 +132,6 @@ let
     configurePhase = ''
       runHook preConfigure
 
-      # Gradle's copyNativeLibs task deletes and recreates this directory.
-      # The source tree is read-only in the dependency update sandbox, so make
-      # the staged Go artifacts writable before Gradle configures the project.
       export HOME=$TMPDIR/home
       mkdir -p $HOME
       cat > android/local.properties <<EOF
@@ -133,12 +144,55 @@ let
       cp -r ${androidCore}/android libclash/android
       chmod -R u+w libclash/android
 
+      mkdir -p .dart_tool
+      cp ${flclashx.pubcache}/package_config.json .dart_tool/package_config.json
+      ${jq}/bin/jq -n --slurpfile lock ${./pubspec-lock.json} '
+        {
+          configVersion: 1,
+          roots: ["flclashx"],
+          packages: (
+            [
+              {
+                name: "flclashx",
+                version: "0.4.2",
+                dependencies: [
+                  $lock[0].packages
+                  | to_entries[]
+                  | select(.value.dependency | startswith("direct"))
+                  | .key
+                ],
+                devDependencies: [],
+                dependencyOverrides: []
+              }
+            ]
+            + [
+              $lock[0].packages
+              | to_entries[]
+              | {
+                  name: .key,
+                  version: .value.version,
+                  dependencies: [],
+                  devDependencies: [],
+                  dependencyOverrides: []
+                }
+            ]
+          )
+        }
+      ' > .dart_tool/package_graph.json
+
       runHook postConfigure
     '';
 
     buildPhase = ''
       runHook preBuild
 
+      export GRADLE_OPTS="''${GRADLE_OPTS:-} \
+        -Dhttp.proxyHost=$MITM_CACHE_HOST \
+        -Dhttp.proxyPort=$MITM_CACHE_PORT \
+        -Dhttps.proxyHost=$MITM_CACHE_HOST \
+        -Dhttps.proxyPort=$MITM_CACHE_PORT \
+        -Djavax.net.ssl.trustStore=$MITM_CACHE_KEYSTORE \
+        -Djavax.net.ssl.trustStorePassword=$MITM_CACHE_KS_PWD"
       flutter build apk \
         --release \
         --no-pub \

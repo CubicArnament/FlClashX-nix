@@ -41,7 +41,7 @@
             src = self;
           };
           android = pkgs.callPackage ./android.nix {
-            inherit core;
+            inherit core flclashx;
             src = self;
           };
         in
@@ -64,8 +64,6 @@
           };
         }
         // lib.optionalAttrs (system == "x86_64-linux") {
-          # Record every Gradle/Maven response into gradle-deps.json. The normal
-          # Android derivation replays this cache without external network access.
           update-android-deps =
             let
               script = self.packages.x86_64-linux.android-deps.updateScript;
@@ -83,7 +81,10 @@
           pkgs = pkgsFor system;
           androidComposition = pkgs.androidenv.composeAndroidPackages {
             platformVersions = [ "36" ];
-            buildToolsVersions = [ "36.0.0" ];
+            buildToolsVersions = [
+              "35.0.0"
+              "36.0.0"
+            ];
             abiVersions = [
               "armeabi-v7a"
               "arm64-v8a"

@@ -26,7 +26,7 @@ The Linux desktop output supports `x86_64-linux` and `aarch64-linux`.
 ## Android
 
 Android builds require an `x86_64-linux` host. The flake uses Android API 36,
-build-tools 36.0.0, NDK 28.0.13004108, CMake 3.22.1, and generates native cores
+build-tools 35.0.0 and 36.0.0, NDK 28.0.13004108, CMake 3.22.1, and generates native cores
 for `armeabi-v7a`, `arm64-v8a`, and `x86_64`.
 
 ```bash

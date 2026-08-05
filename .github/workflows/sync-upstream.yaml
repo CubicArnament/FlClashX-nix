@@ -23,7 +23,7 @@ jobs:
           git remote add upstream https://github.com/pluralplay/FlClashX.git
           git fetch upstream main
           before=$(git rev-parse HEAD)
-          git merge --no-edit upstream/main
+          git merge --no-ff --no-edit upstream/main
 
           # This fork intentionally supports Linux and Android only.
           git rm -r --ignore-unmatch \
