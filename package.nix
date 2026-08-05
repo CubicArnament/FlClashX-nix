@@ -5,6 +5,7 @@
   libayatana-appindicator,
   keybinder3,
   gsettings-desktop-schemas,
+  glib,
   makeWrapper,
   core,
   src,
@@ -49,6 +50,7 @@ flutter341.buildFlutterApplication {
       --prefix PATH : ${
         lib.makeBinPath [
           core
+          glib
           xdg-utils
         ]
       }

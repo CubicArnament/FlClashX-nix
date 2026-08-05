@@ -23,12 +23,17 @@ The attested values are rendered below for convenient review. Download
 The attached `nixos-system-test.md` documents a successful headless NixOS VM
 smoke test for this commit. It exercises the packaged application in a clean
 non-FHS NixOS environment with software EGL, X11, and a private D-Bus session.
+Its parsed GUI, D-Bus, and Xorg diagnostics are rendered below this attestation.
 
 Warning: this is a functional startup test, not a visual-rendering or
 end-to-end UI test.
 
 Warning: the minimal VM has no StatusNotifier watcher. Its expected optional
 tray-integration D-Bus warning is documented in `nixos-system-test.md`.
+
+> [!NOTE]
+> The diagnostics below are parsed, bounded excerpts from the successful VM
+> run. Dynamic timestamps, process identities, and Nix store paths are redacted.
 
 ## Reproduce
 

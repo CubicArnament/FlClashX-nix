@@ -41,6 +41,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="attestation-${GITHUB_SHA}"
+          cp attestation-result/release-notes.md release-notes.md
+          cat nixos-system-test.md >> release-notes.md
           gh release list --limit 100 --json tagName --jq '.[].tagName | select(startswith("attestation-"))' |
             while IFS= read -r old_tag; do
               gh release delete "$old_tag" --yes --cleanup-tag
@@ -48,4 +50,4 @@ jobs:
           gh release create "$tag" attestation-result/attestation.json nixos-system-test.md \
             --target "$GITHUB_SHA" \
             --title "Dependency attestation ${GITHUB_SHA::12}" \
-            --notes-file attestation-result/release-notes.md
+            --notes-file release-notes.md

@@ -37,4 +37,62 @@ runCommand "flclashx-nixos-system-report" { nativeBuildInputs = [ nixosVmTest ];
 
   This is a headless smoke test, not a visual-rendering or end-to-end UI test.
   EOF
+
+  cat >> $out <<'EOF'
+
+  ## Runtime Diagnostics
+
+  > [!IMPORTANT]
+  > This section contains parsed, bounded excerpts from the successful VM run.
+  > It is diagnostic evidence, not a visual-regression result.
+
+  | Area | Result |
+  | --- | --- |
+  | GUI | X11 window `FlClashX` was discovered under headless Xorg. |
+  | Runtime | Process remained alive for 10 seconds. |
+  | D-Bus | `com.follow.clashx` appeared in the private session monitor. |
+  | Crash scan | No `fatal` or `segmentation fault` marker was found. |
+  EOF
+  printf '| GUI diagnostics | %s headless-rendering diagnostics were recorded. |\n' \
+    "$(grep -Ec 'WARNING|CRITICAL' ${nixosVmTest}/diagnostics/flclashx.log || true)" >> $out
+  printf '| D-Bus warnings | %s missing-desktop-service events were recorded. |\n' \
+    "$(grep -Ec 'Error\.(NameHasNoOwner|ServiceUnknown)' ${nixosVmTest}/diagnostics/flclashx-dbus.log || true)" >> $out
+  cat >> $out <<'EOF'
+
+  <details>
+  <summary><strong>GUI runtime</strong> <code>Flutter/GTK</code> diagnostics</summary>
+
+  ```text
+  EOF
+  grep -E 'Atk-|appindicator-|WARNING|CRITICAL|ServiceUnknown|ProcessException' ${nixosVmTest}/diagnostics/flclashx.log |
+    sed -E 's/[0-9]{2}:[0-9]{2}:[0-9.]+: //; s/\(com\.follow\.clashx:[0-9]+\)/(com.follow.clashx:<pid>)/' |
+    sort | uniq -c | sed -E 's/^ *([0-9]+) /[\1x] /' | awk 'NR <= 20' >> $out || true
+  cat >> $out <<'EOF'
+  ```
+  </details>
+
+  <details>
+  <summary><strong>D-Bus</strong> application-name registration</summary>
+
+  ```text
+  EOF
+  grep -A 12 'member=RequestName' ${nixosVmTest}/diagnostics/flclashx-dbus.log |
+    sed -E 's/time=[0-9.]+ /time=<redacted> /; s/sender=:[0-9.]+/sender=<app>/' |
+    awk 'NR <= 20' >> $out || true
+  cat >> $out <<'EOF'
+  ```
+  </details>
+
+  <details>
+  <summary><strong>Xorg</strong> headless display-server startup</summary>
+
+  ```text
+  EOF
+  grep -E 'X\.Org X Server|X Protocol Version|Current version of pixman|Using config file|Using system config directory|not fatal' ${nixosVmTest}/diagnostics/flclashx-xorg.log |
+    sed -E 's#"/nix/store/[^/]*/#"<nix-store>/#; s#"/tmp/[^\"]*"#"<temporary-config>"#' |
+    awk 'NR <= 20' >> $out || true
+  cat >> $out <<'EOF'
+  ```
+  </details>
+  EOF
 ''
