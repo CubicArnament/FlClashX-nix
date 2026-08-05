@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   sync:
@@ -16,22 +17,41 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Merge and prune upstream
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Merge, prune, and validate upstream
         run: |
           git config user.name "flclashx-nix bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add upstream https://github.com/pluralplay/FlClashX.git
           git fetch upstream main
-          before=$(git rev-parse HEAD)
+          git switch -c "sync/upstream-${GITHUB_RUN_ID}"
           git merge --no-ff --no-edit upstream/main
 
-          # This fork intentionally supports Linux and Android only.
           git rm -r --ignore-unmatch \
             windows macos ios services/helper plugins/proxy plugins/window_ext
 
-          if [ "$before" = "$(git rev-parse HEAD)" ]; then
+          if git diff --quiet origin/main; then
             exit 0
           fi
 
-          git commit --amend --no-edit
-          git push origin HEAD:main
+          nix run github:NixOS/nixpkgs/104240a772428cc2e20d8fd86c9ddbb886bbaff2#deadnix -- --fail .
+          nix run github:NixOS/nixpkgs/104240a772428cc2e20d8fd86c9ddbb886bbaff2#statix -- check .
+          nix flake check --no-build
+          nix build .#dependency-attestation
+          git commit -m "sync: merge upstream main"
+
+      - name: Create upstream sync pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="sync/upstream-${GITHUB_RUN_ID}"
+          if git diff --quiet origin/main; then
+            exit 0
+          fi
+          git push origin "HEAD:$branch"
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "sync: merge upstream main" \
+            --body "Automated upstream merge for Linux/NixOS and Android. Nix lint, no-build flake evaluation, and dependency attestation passed. No APK was built."

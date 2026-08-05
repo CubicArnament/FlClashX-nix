@@ -47,6 +47,7 @@
         in
         {
           inherit flclashx core;
+          dependency-attestation = pkgs.callPackage ./attestation.nix { };
           default = flclashx;
         }
         // lib.optionalAttrs (system == "x86_64-linux") {
@@ -75,12 +76,9 @@
         }
       );
 
-      checks = forAllSystems (
-        system:
-        {
-          dependency-attestation = (pkgsFor system).callPackage ./attestation.nix { };
-        }
-      );
+      checks = forAllSystems (system: {
+        dependency-attestation = self.packages.${system}.dependency-attestation;
+      });
 
       devShells = forAllSystems (
         system:

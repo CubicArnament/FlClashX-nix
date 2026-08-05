@@ -60,6 +60,7 @@ docs/
 #libclash
 /libclash/
 result
+attestation-result
 
 #jniLibs
 /android/app/src/main/jniLibs/

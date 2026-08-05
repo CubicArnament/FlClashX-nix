@@ -1,36 +1,61 @@
-# FlClashX
+# FlClashX-nix
 
 [Русский](README.md) | [English](README_EN.md)
 
-FlClashX - ClashMeta негізіндегі ашық бастапқы коды бар, жарнамасыз прокси
-клиенті. Бұл fork тек Linux desktop және Android платформаларын қолдайды.
+[pluralplay/FlClashX](https://github.com/pluralplay/FlClashX) жобасының Nix
+flake fork-ы. Бұл fork тек Linux/NixOS және Android үшін жасалған; Windows,
+macOS және iOS қолдау көрсетілмейді. Қолданба коды, лицензиясы және бастапқы
+авторлары [upstream жобасында](https://github.com/pluralplay/FlClashX) берілген.
+
+Бұл upstream-тің ресми дистрибутиві емес және оның атынан қайырымдылық
+қабылдамайды. APK release жарияланбайды: Android derivation тек
+қайталанатын Nix құрастыруы мен тексеруі үшін қолданылады.
 
 ## Мүмкіндіктер
 
-- Clash/Mihomo конфигурациялары мен жазылымдарын басқару.
-- Android VPN және Linux TUN/system proxy режимдері.
-- QR-код арқылы жазылым қосу, прокси мен профильдерді басқару.
-- Android TV, жоғары жаңарту жиілікті Android дисплейлері және Remnawave
-  тақта интеграциясы.
+- `x86_64-linux` және `aarch64-linux` үшін Linux desktop пакеті.
+- `programs.flclashx.enable` NixOS модулі.
+- `x86_64-linux` host-та Android ортасы және universal APK derivation;
+  `armeabi-v7a`, `arm64-v8a`, `x86_64` ABI қолданылады.
+- Nix, Pub, Go және Maven/Gradle тәуелділіктері бекітілген.
+- Nix lint және аттестациямен автоматты upstream-sync pull request-і.
 
-## NixOS және құрастыру
+## NixOS орнату
 
-Nix flake Flutter, Go, Android SDK/NDK және Gradle нұсқаларын бекітеді.
-Linux desktop `x86_64-linux` және `aarch64-linux` жүйелерінде қолжетімді.
-Android universal APK тек `x86_64-linux` хостында құрастырылады және
-`armeabi-v7a`, `arm64-v8a`, `x86_64` ABI нұсқаларын қамтиды.
+```nix
+{
+  inputs.flclashx.url = "github:CubicArnament/FlClashX-nix";
 
-Барлық командалар, тәуелділік lock-файлдарын жаңарту және NixOS модулін қосу
-туралы нұсқаулық: [COMMANDS.md](COMMANDS.md).
-
-## Android әрекеттері
-
-```text
-com.follow.clashx.action.START
-com.follow.clashx.action.STOP
-com.follow.clashx.action.CHANGE
+  outputs = { nixpkgs, flclashx, ... }: {
+    nixosConfigurations.host = nixpkgs.lib.nixosSystem {
+      modules = [
+        flclashx.nixosModules.default
+        { programs.flclashx.enable = true; }
+      ];
+    };
+  };
+}
 ```
 
-Толық пайдаланушы нұсқаулығы, жазылымның custom header-лері мен YAML
-параметрлері әзірше [орысша](README.md) және [ағылшынша](README_EN.md)
-құжаттарында берілген.
+## Тексеру
+
+```bash
+nix flake check --no-build
+nix build .#flclashx --dry-run
+nix build .#android-apk --dry-run
+```
+
+Бұл Android тексеруі APK құрмайды. Командалар мен lock-файлдарын әдейі
+жаңарту нұсқаулығы [COMMANDS.md](COMMANDS.md) ішінде.
+
+## Аттестация
+
+`nix flake check --no-build` lock-файлдар құрылымын және ішкі хештерін
+тексереді. `main` ішіндегі әр push үшін GitHub Actions тек Nix жасаған JSON
+аттестация есебі бар уақытша Release құрады. Ол жеті күннен кейін жойылады;
+APK не басқа бинарник жарияланбайды.
+
+## Лицензия
+
+Осы fork-тің Nix коды жоба кодымен бірге [GPL-3.0-only](LICENSE) шарттарымен
+таратылады. Upstream лицензиялық хабарламаларын да қараңыз.
